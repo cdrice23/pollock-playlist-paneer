@@ -2,6 +2,7 @@ import React from "react";
 import { CssBaseline, ThemeProvider } from "@mui/material";
 import { theme } from "../styles/theme";
 import { StyledEngineProvider } from "@mui/material";
+import { SessionProvider } from "next-auth/react";
 // tested from MUI/next.js tutorial
 import PropTypes from "prop-types";
 import Head from "next/head";
@@ -23,11 +24,12 @@ function MyApp({
         <Head>
           <meta name="viewport" content="initial-scale=1, width=device-width" />
         </Head>
-
-        <ThemeProvider theme={theme}>
-          <CssBaseline />
-          <Component {...pageProps} />
-        </ThemeProvider>
+        <SessionProvider session={pageProps.session}>
+          <ThemeProvider theme={theme}>
+            <CssBaseline />
+            <Component {...pageProps} />
+          </ThemeProvider>
+        </SessionProvider>
       </CacheProvider>
     </StyledEngineProvider>
   );
