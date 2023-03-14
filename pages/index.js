@@ -7,8 +7,8 @@ import useSpotify from "@/hooks/useSpotify";
 export default function Home() {
   const spotifyApi = useSpotify();
   const { data: session, status } = useSession();
-  const [topArtists, setTopArtists] = useState([]);
   const [allRecs, setAllRecs] = useState([]);
+  const [colorPrompt, setColorPrompt] = useState([]);
 
   // helpers
   // Get track recommendations from an artist
@@ -145,10 +145,6 @@ export default function Home() {
     { name: "Maroon", value: 1 },
   ];
 
-  console.log(
-    colorArray.filter((obj) => obj.value === 0.44).map((color) => color.name)
-  );
-
   useEffect(() => {
     // Ensure access token is available from custom Spotify hook
     if (spotifyApi.getAccessToken()) {
@@ -156,7 +152,6 @@ export default function Home() {
       spotifyApi.getMyTopArtists({ limit: 25 }).then(function (data) {
         let topArtistsRaw = data.body.items;
         // console.log(topArtistsRaw);
-        let allRecs = [];
         // Generate full recommended track array from top artist list
         Promise.all(
           topArtistsRaw.map((artist) => getArtistRecommendedTracks(artist.id))
@@ -174,19 +169,14 @@ export default function Home() {
           })
           // Calculate color factor
           .then((data) => {
-            return data.map(
-              (track) =>
-                colorArray
-                  .filter(
-                    (obj) =>
-                      obj.value ===
-                      Number((track.energy * track.valence).toFixed(2))
-                  )
-                  .map((color) => color.name)
-              // ({
-              //   ...track,
-              //   colorFactor: Number((track.energy * track.valence).toFixed(2)),
-              // })
+            return data.map((track) =>
+              colorArray
+                .filter(
+                  (obj) =>
+                    obj.value ===
+                    Number((track.energy * track.valence).toFixed(4))
+                )
+                .map((color) => color.name)
             );
           })
           // Flatten data in array
@@ -194,15 +184,38 @@ export default function Home() {
             let flattened = data.flat(1);
             return flattened;
           })
+          // generate group count
+          .then((data) => {
+            const groupByColor = colorArray
+              .map((color) => ({
+                color: color,
+                count: data.filter((item) => item == color.name).length,
+                percentage: Math.round(
+                  (data.filter((item) => item == color.name).length /
+                    data.length) *
+                    100
+                ),
+              }))
+              .filter((obj) => obj.count > 0);
+            return groupByColor;
+          })
+          // Generate search prompt
+          .then((data) => {
+            const colorClause = data
+              .map((obj) => obj.color.name)
+              .slice(0, 30)
+              .join(", ");
+            return `An oil painting in the style of Jackson Pollock using the following colors: ${colorClause}`;
+          })
           // Set variable
           .then((data) => {
-            setAllRecs(data);
+            setColorPrompt(data);
           });
       });
     }
-  }, [session, spotifyApi]);
+  }, [session]);
 
-  console.log(allRecs);
+  console.log(colorPrompt);
 
   return (
     <>
