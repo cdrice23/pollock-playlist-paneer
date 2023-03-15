@@ -1,14 +1,36 @@
+import React from "react";
 import { useState, useEffect } from "react";
-import { Box, Button, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  Typography,
+  Toolbar,
+  AppBar,
+  IconButton,
+  Menu,
+  MenuItem,
+  Icon,
+} from "@mui/material";
+import MenuIcon from "@mui/icons-material/Menu";
 import { signOut, useSession } from "next-auth/react";
 import axios from "axios";
 import useSpotify from "@/hooks/useSpotify";
+import Link from "next/link";
 
 export default function Home() {
   const spotifyApi = useSpotify();
   const { data: session, status } = useSession();
   const [allRecs, setAllRecs] = useState([]);
   const [colorPrompt, setColorPrompt] = useState([]);
+  const [anchorEl, setAnchorEl] = React.useState(null);
+
+  const open = Boolean(anchorEl);
+  const handleMenuOpen = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
 
   // helpers
   // Get track recommendations from an artist
@@ -145,86 +167,123 @@ export default function Home() {
     { name: "Maroon", value: 1 },
   ];
 
-  useEffect(() => {
-    // Ensure access token is available from custom Spotify hook
-    if (spotifyApi.getAccessToken()) {
-      // Fetch top artist data from user
-      spotifyApi.getMyTopArtists({ limit: 25 }).then(function (data) {
-        let topArtistsRaw = data.body.items;
-        // console.log(topArtistsRaw);
-        // Generate full recommended track array from top artist list
-        Promise.all(
-          topArtistsRaw.map((artist) => getArtistRecommendedTracks(artist.id))
-        )
-          // Get audio metadata from recommended tracks
-          .then((data) => {
-            return Promise.all(data.map((tracks) => getTrackMeta(tracks))).then(
-              (data) => data.map((obj) => obj.audio_features)
-            );
-          })
-          // Flatten data in array
-          .then((data) => {
-            let flattened = data.flat(1);
-            return flattened;
-          })
-          // Calculate color factor
-          .then((data) => {
-            return data.map((track) =>
-              colorArray
-                .filter(
-                  (obj) =>
-                    obj.value ===
-                    Number((track.energy * track.valence).toFixed(4))
-                )
-                .map((color) => color.name)
-            );
-          })
-          // Flatten data in array
-          .then((data) => {
-            let flattened = data.flat(1);
-            return flattened;
-          })
-          // generate group count
-          .then((data) => {
-            const groupByColor = colorArray
-              .map((color) => ({
-                color: color,
-                count: data.filter((item) => item == color.name).length,
-                percentage: Math.round(
-                  (data.filter((item) => item == color.name).length /
-                    data.length) *
-                    100
-                ),
-              }))
-              .filter((obj) => obj.count > 0);
-            return groupByColor;
-          })
-          // Generate search prompt
-          .then((data) => {
-            const colorClause = data
-              .map((obj) => obj.color.name)
-              .slice(0, 30)
-              .join(", ");
-            return `An oil painting in the style of Jackson Pollock using the following colors: ${colorClause}`;
-          })
-          // Set variable
-          .then((data) => {
-            setColorPrompt(data);
-          });
-      });
-    }
-  }, [session]);
+  // useEffect(() => {
+  //   // Ensure access token is available from custom Spotify hook
+  //   if (spotifyApi.getAccessToken()) {
+  //     // Fetch top artist data from user
+  //     spotifyApi.getMyTopArtists({ limit: 25 }).then(function (data) {
+  //       let topArtistsRaw = data.body.items;
+  //       // console.log(topArtistsRaw);
+  //       // Generate full recommended track array from top artist list
+  //       Promise.all(
+  //         topArtistsRaw.map((artist) => getArtistRecommendedTracks(artist.id))
+  //       )
+  //         // Get audio metadata from recommended tracks
+  //         .then((data) => {
+  //           return Promise.all(data.map((tracks) => getTrackMeta(tracks))).then(
+  //             (data) => data.map((obj) => obj.audio_features)
+  //           );
+  //         })
+  //         // Flatten data in array
+  //         .then((data) => {
+  //           let flattened = data.flat(1);
+  //           return flattened;
+  //         })
+  //         // Calculate color factor
+  //         .then((data) => {
+  //           return data.map((track) =>
+  //             colorArray
+  //               .filter(
+  //                 (obj) =>
+  //                   obj.value ===
+  //                   Number((track.energy * track.valence).toFixed(4))
+  //               )
+  //               .map((color) => color.name)
+  //           );
+  //         })
+  //         // Flatten data in array
+  //         .then((data) => {
+  //           let flattened = data.flat(1);
+  //           return flattened;
+  //         })
+  //         // generate group count
+  //         .then((data) => {
+  //           const groupByColor = colorArray
+  //             .map((color) => ({
+  //               color: color,
+  //               count: data.filter((item) => item == color.name).length,
+  //               percentage: Math.round(
+  //                 (data.filter((item) => item == color.name).length /
+  //                   data.length) *
+  //                   100
+  //               ),
+  //             }))
+  //             .filter((obj) => obj.count > 0);
+  //           return groupByColor;
+  //         })
+  //         // Generate search prompt
+  //         .then((data) => {
+  //           const shuffleArray = (array) => {
+  //             for (let i = array.length - 1; i > 0; i--) {
+  //               const j = Math.floor(Math.random() * (i + 1));
+  //               const temp = array[i];
+  //               array[i] = array[j];
+  //               array[j] = temp;
+  //             }
+  //           };
+  //           // Shuffle colors in case n > 30 (using Fisher-Yates randomization)
+  //           shuffleArray(data);
+  //           const colorClause = data
+  //             .map((obj) => obj.color.name)
+  //             .slice(0, 30)
+  //             .join(", ");
+  //           return `An oil painting in the style of Jackson Pollock using the following colors: ${colorClause}`;
+  //         })
+  //         // Set variable
+  //         .then((data) => {
+  //           setColorPrompt(data);
+  //         });
+  //     });
+  //   }
+  // }, [session]);
 
   console.log(colorPrompt);
 
   return (
     <>
+      <AppBar>
+        <Toolbar>
+          <Box flexGrow={1}></Box>
+          <Button color="inherit" sx={{ display: { xs: "none", sm: "block" } }}>
+            Buy Me a Coffee!
+          </Button>
+          <Button color="inherit" sx={{ display: { xs: "none", sm: "block" } }}>
+            Log Out
+          </Button>
+          <IconButton
+            onClick={handleMenuOpen}
+            color="inherit"
+            sx={{ display: { sm: "none" } }}
+          >
+            <MenuIcon />
+          </IconButton>
+          <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
+            <MenuItem>
+              <Link
+                href="https://www.buymeacoffee.com/cdrice23"
+                target="_blank"
+              >
+                Buy Me a Coffee!
+              </Link>
+            </MenuItem>
+            <MenuItem onClick={() => signOut()}>Log Out</MenuItem>
+          </Menu>
+        </Toolbar>
+      </AppBar>
+      <Toolbar />
       <Box>
         <Typography>This is supposed to be the timeline page.</Typography>
       </Box>
-      <Button variant="contained" onClick={() => signOut()}>
-        Log out
-      </Button>
     </>
   );
 }
