@@ -8,6 +8,7 @@ import PropTypes from "prop-types";
 import Head from "next/head";
 import { CacheProvider } from "@emotion/react";
 import createEmotionCache from "../lib/createEmotionCache";
+import { RecoilRoot } from "recoil";
 
 // tested from MUI/next.js tutorial
 const clientSideEmotionCache = createEmotionCache();
@@ -27,7 +28,9 @@ function MyApp({
         <SessionProvider session={pageProps.session}>
           <ThemeProvider theme={theme}>
             <CssBaseline />
-            <Component {...pageProps} />
+            <RecoilRoot>
+              <Component {...pageProps} />
+            </RecoilRoot>
           </ThemeProvider>
         </SessionProvider>
       </CacheProvider>

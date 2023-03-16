@@ -26,7 +26,7 @@ export default function Login(props) {
           margin="auto"
         >
           <Image
-            src="/logo.png"
+            src="/logo.webp"
             alt="A line-drawing of Jackson Pollock wearing headphones."
             fill
             sizes="(max-width: 768px) 100vw,

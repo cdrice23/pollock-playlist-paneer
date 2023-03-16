@@ -16,13 +16,17 @@ import { signOut, useSession } from "next-auth/react";
 import axios from "axios";
 import useSpotify from "@/hooks/useSpotify";
 import Link from "next/link";
+import { useRecoilState } from "recoil";
+import { useRouter } from "next/router";
+import { colorPromptState, loadingState } from "@/components/atoms";
 
 export default function Home() {
   const spotifyApi = useSpotify();
   const { data: session, status } = useSession();
-  const [allRecs, setAllRecs] = useState([]);
-  const [colorPrompt, setColorPrompt] = useState([]);
+  const [colorPrompt, setColorPrompt] = useRecoilState(colorPromptState);
+  const [loading, setLoading] = useRecoilState(loadingState);
   const [anchorEl, setAnchorEl] = React.useState(null);
+  const router = useRouter();
 
   const open = Boolean(anchorEl);
   const handleMenuOpen = (event) => {
@@ -30,6 +34,10 @@ export default function Home() {
   };
   const handleClose = () => {
     setAnchorEl(null);
+  };
+  const handleGenerate = () => {
+    setLoading(true);
+    router.push("/result");
   };
 
   // helpers
@@ -248,6 +256,7 @@ export default function Home() {
   // }, [session]);
 
   console.log(colorPrompt);
+  console.log(loading);
 
   return (
     <>
@@ -311,7 +320,9 @@ export default function Home() {
           piece of art that represents YOU.
         </Typography>
       </Box>
-      <Button variant="contained">Generate My Painting!</Button>
+      <Button variant="contained" onClick={handleGenerate}>
+        Generate My Painting!
+      </Button>
     </>
   );
 }
