@@ -282,8 +282,36 @@ export default function Home() {
       </AppBar>
       <Toolbar />
       <Box>
-        <Typography>This is supposed to be the timeline page.</Typography>
+        <Typography variant="h3">
+          What does your music taste look like?
+        </Typography>
+        <Typography>
+          That's exactly what{" "}
+          <strong>
+            <em>Pollock Playlist Paneer</em>
+          </strong>{" "}
+          was built for. Using OpenAI's DALL-E learning model, you can generate
+          a unique, AI-generated oil painting in the style of Jackson Pollock
+          that uses YOUR Spotify data.
+        </Typography>
+        <Typography variant="h5">How does it work?</Typography>
+        <Typography>
+          The algorithm takes data on your top artists and translates it into
+          characteristics of your listening style - do you listen to
+          high-energy, angry music? Or do you like more chill classical music?
+        </Typography>
+        <Typography>
+          From there, these characteristics are translated into representative
+          colors from a spectrum describing mood - low-energy, sad songs might
+          plot to a color like Midnigtht Blue; whereas a happier, high-energy
+          song might plot to a color like Lemon Chiffon.
+        </Typography>
+        <Typography>
+          Finally, a prompt is given to DALL-E to generate a completely unique
+          piece of art that represents YOU.
+        </Typography>
       </Box>
+      <Button variant="contained">Generate My Painting!</Button>
     </>
   );
 }
