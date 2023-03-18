@@ -1,6 +1,6 @@
 import React from "react";
 import { CssBaseline, ThemeProvider } from "@mui/material";
-import { theme } from "../styles/theme";
+import { theme } from "@/styles/theme";
 import { StyledEngineProvider } from "@mui/material";
 import { SessionProvider } from "next-auth/react";
 // tested from MUI/next.js tutorial
@@ -15,12 +15,12 @@ const clientSideEmotionCache = createEmotionCache();
 
 function MyApp({
   Component,
-  pageProps,
   emotionCache = clientSideEmotionCache,
+  pageProps,
 }) {
   return (
-    <StyledEngineProvider injectFirst>
-      <CacheProvider value={emotionCache}>
+    <CacheProvider value={emotionCache}>
+      <StyledEngineProvider injectFirst>
         {/* cacheprovider and head tested from MUI/next.js tutorial */}
         <Head>
           <meta name="viewport" content="initial-scale=1, width=device-width" />
@@ -33,8 +33,8 @@ function MyApp({
             </RecoilRoot>
           </ThemeProvider>
         </SessionProvider>
-      </CacheProvider>
-    </StyledEngineProvider>
+      </StyledEngineProvider>
+    </CacheProvider>
   );
 }
 

@@ -1,0 +1,18 @@
+.title {
+    text-align: center;
+    margin: 32px 8px;
+}
+
+.tag {
+    text-align: center;
+    margin: 0 16px 16px;
+}
+
+.logo {
+    margin: 8px auto;
+}
+
+.buttonContainer {
+    display: flex;
+    justify-content: center;
+}

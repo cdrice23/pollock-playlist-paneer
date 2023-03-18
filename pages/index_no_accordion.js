@@ -9,12 +9,9 @@ import {
   IconButton,
   Menu,
   MenuItem,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
+  Icon,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { signOut, useSession } from "next-auth/react";
 import axios from "axios";
 import useSpotify from "@/hooks/useSpotify";
@@ -29,7 +26,7 @@ export default function Home() {
   const { data: session, status } = useSession();
   const [colorPrompt, setColorPrompt] = useRecoilState(colorPromptState);
   const [loading, setLoading] = useRecoilState(loadingState);
-  const [anchorEl, setAnchorEl] = useState(null);
+  const [anchorEl, setAnchorEl] = React.useState(null);
   const router = useRouter();
 
   const open = Boolean(anchorEl);
@@ -324,80 +321,27 @@ export default function Home() {
           AI-generated oil painting in the style of Jackson Pollock that uses{" "}
           <span className={styles.popBody}>YOUR</span> Spotify data.
         </Typography>
-        <Accordion
-          elevation={0}
-          disableGutters
-          sx={{
-            "&:before": {
-              display: "none",
-            },
-          }}
-        >
-          <AccordionSummary
-            expandIcon={<ExpandMoreIcon className={styles.carrot} />}
-            className={styles.accordionSummary}
-          >
-            <Typography variant="h4" className={styles.accordionSummaryText}>
-              How does it work?
-            </Typography>
-          </AccordionSummary>
-          <AccordionDetails>
-            <Typography className={styles.body}>
-              The algorithm takes data on your top artists and translates it
-              into characteristics of your listening style. For example - do you
-              listen to more high-energy, angry metal music? Or do you like more
-              chill, calm classical music? Or maybe your music taste is more
-              diverse!
-            </Typography>
-            <Typography className={styles.body}>
-              From there, these characteristics are translated into
-              representative colors from a spectrum describing mood. Low-energy,
-              sad songs might plot to a color like{" "}
-              <span className={styles.midnightBlue}>Midnight Blue</span>,
-              whereas a happier, high-energy song might plot to a color like{" "}
-              <span className={styles.peachPuff}>Peach Puff</span>.
-            </Typography>
-            <Typography className={styles.body}>
-              Finally, a prompt is given to DALL-E to generate a completely
-              unique piece of art that represents{" "}
-              <span className={styles.popYou}>YOU.</span>
-            </Typography>
-          </AccordionDetails>
-        </Accordion>
-        <Accordion
-          elevation={0}
-          disableGutters
-          sx={{
-            "&:before": {
-              display: "none",
-            },
-          }}
-        >
-          <AccordionSummary
-            expandIcon={<ExpandMoreIcon className={styles.carrot} />}
-            className={styles.accordionSummary}
-          >
-            <Typography variant="h4" className={styles.accordionSummaryText}>
-              What's with the name?
-            </Typography>
-          </AccordionSummary>
-          <AccordionDetails>
-            <Typography className={styles.body}>
-              (For those of you who do not know){" "}
-              <span className={styles.popBody}>"palak paneer"</span> is a
-              traditional North Indian vegetarian dish consisting of pureed
-              spinach (<em>"palak"</em> in Hindi) and cheese (<em>"paneer"</em>
-              ). If you haven't tried it before, go order some from your local
-              Indian restaurant ASAP!
-            </Typography>
-            <Typography className={styles.body}>
-              To be totally honest, the name "Pollock Paneer" was the result of
-              intrusive shower thoughts, coupled with a propensity for making
-              really bad dad jokes...
-            </Typography>
-            <Typography className={styles.groans}>*hold for groans*</Typography>
-          </AccordionDetails>
-        </Accordion>
+        <Typography variant="h3" className={styles.header}>
+          How does it work?
+        </Typography>
+        <Typography className={styles.body}>
+          The algorithm takes data on your top artists and translates it into
+          characteristics of your listening style - do you listen to
+          high-energy, angry music? Or do you like more chill classical music?
+        </Typography>
+        <Typography className={styles.body}>
+          From there, these characteristics are translated into representative
+          colors from a spectrum describing mood - low-energy, sad songs might
+          plot to a color like{" "}
+          <span className={styles.midnightBlue}>Midnight Blue</span>; whereas a
+          happier, high-energy song might plot to a color like{" "}
+          <span className={styles.peachPuff}>Peach Puff.</span>
+        </Typography>
+        <Typography className={styles.body}>
+          Finally, a prompt is given to DALL-E to generate a completely unique
+          piece of art that represents{" "}
+          <span className={styles.popYou}>YOU.</span>
+        </Typography>
       </Box>
       <Box className={styles.buttonContainer}>
         <Button

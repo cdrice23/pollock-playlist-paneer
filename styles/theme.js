@@ -1,41 +1,64 @@
 import { createTheme } from "@mui/material";
-import { Amiri, Fondamento, Cormorant_Unicase } from "@next/font/google";
+import {
+  Cutive_Mono,
+  Newsreader,
+  Sono,
+  Special_Elite,
+  Yuji_Syuku,
+} from "@next/font/google";
 
-const amiri = Amiri({ weight: "400" });
-const fondamento = Fondamento({ weight: "400" });
-const cormorant = Cormorant_Unicase({ weight: "400" });
+const cutive_mono = Cutive_Mono({ weight: "400", subsets: ["latin"] });
+const newsreader = Newsreader({ weight: "400", subsets: ["latin"] });
+const sono = Sono({ weight: "400", subsets: ["latin"] });
+const yuji = Yuji_Syuku({ weight: "400", subsets: ["latin"] });
+const special_elite = Special_Elite({ weight: "400", subsets: ["latin"] });
 
 export const theme = createTheme({
-  typography: {
-    fontFamily: amiri.style.fontFamily,
-    fontSize: 16,
-    h1: {
-      fontFamily: fondamento.style.fontFamily,
-    },
-    h4: {
-      fontFamily: fondamento.style.fontFamily,
-    },
-    h5: {
-      fontFamily: fondamento.style.fontFamily,
-    },
-    h6: {
-      fontFamily: cormorant.style.fontFamily,
-      fontSize: "1.3rem",
-      fontWeight: "bold",
-    },
-  },
   palette: {
     primary: {
-      main: "#c12525",
+      main: "#cc0000",
     },
     secondary: {
       main: "#4f83cc",
     },
     background: {
       default: "#fff5e6",
+      paper: "#fff5e6",
+    },
+    text: {
+      primary: "#cc0000",
     },
   },
   typography: {
+    fontFamily: sono.style.fontFamily,
+    fontSize: 16,
+    h1: {
+      fontFamily: yuji.style.fontFamily,
+    },
+    h2: {
+      fontFamily: yuji.style.fontFamily,
+    },
+    h3: {
+      fontFamily: yuji.style.fontFamily,
+      "@media (max-width: 600px)": {
+        fontSize: "2.4rem",
+      },
+    },
+    h4: {
+      fontFamily: yuji.style.fontFamily,
+      "@media (max-width: 600px)": {
+        fontSize: "1.8rem",
+      },
+    },
+    h5: {
+      fontFamily: yuji.style.fontFamily,
+      "@media (max-width: 600px)": {
+        fontSize: "1.3rem",
+      },
+    },
+    h6: {
+      fontFamily: sono.style.fontFamily,
+    },
     button: {
       textTransform: "none",
     },

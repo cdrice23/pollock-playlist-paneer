@@ -1,0 +1,85 @@
+.header {
+    text-align: center;
+    margin: 32px 0;
+    padding: 0 16px;
+}
+
+.accordionSummary > div {
+    flex-grow: 0;
+    margin: 0 8px
+}
+
+.accordionSummaryText {
+    
+    padding: 8px
+}
+
+.carrot {
+    color: #cc0000
+}
+
+.body {
+    margin: 0 auto 16px;
+    padding: 4px 16px;
+    max-width: 680px
+}
+
+.groans {
+    margin: 0 auto 16px;
+    padding: 4px 16px;
+    max-width: 680px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.link {
+    text-decoration: none;
+    color: inherit;
+}
+
+.generate {
+    margin: 16px auto 20%
+}
+
+.buttonContainer {
+    display: flex;
+    justify-content: center;
+}
+
+.pop {
+    display: inline-block;
+    margin-top: 1rem;
+    background-color: #cc0000;
+    color: #fff5e6;
+    padding: 0 8px 0.5rem;
+}
+
+.popBody {
+    font-style: italic;
+    font-weight: bold;
+}
+
+.embiggen {
+    font-size: 1.4rem;
+}
+
+.popYou {
+    display: inline-block;
+    padding: 0 4px 0 8px;
+    background-color: #cc0000;
+    color: #fff5e6;
+}
+
+.midnightBlue {
+    display: inline-block;
+    padding: 0 4px;
+    background-color: midnightblue;
+    color: #fff5e6;
+}
+
+.peachPuff {
+    display: inline-block;
+    padding: 0 4px;
+    background-color: peachpuff;
+    color: inherit;
+}
