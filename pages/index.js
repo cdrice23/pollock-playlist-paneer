@@ -179,83 +179,112 @@ export default function Home() {
     { name: "Maroon", value: 1 },
   ];
 
+  // Backoff retry generalized
+  const retryOperation = (fn) => {
+    let currentAttempt = 0;
+
+    while (true) {
+      try {
+        fn();
+        console.log("Operation successful.");
+        break;
+      } catch (error) {
+        currentAttempt++;
+        console.log(`Operation failed. Attempt #${currentAttempt}`);
+        console.log(error);
+        if (currentAttempt >= 3) {
+          console.log(`Max retries attempted. Exiting function.`);
+          break;
+        }
+      }
+    }
+  };
+
+  const exampleService = () => {
+    return false;
+  };
+
+  retryOperation(exampleService());
+
   // useEffect(() => {
   //   // Ensure access token is available from custom Spotify hook
   //   if (spotifyApi.getAccessToken()) {
   //     // Fetch top artist data from user
-  //     spotifyApi.getMyTopArtists({ limit: 25 }).then(function (data) {
-  //       let topArtistsRaw = data.body.items;
-  //       // console.log(topArtistsRaw);
-  //       // Generate full recommended track array from top artist list
-  //       Promise.all(
-  //         topArtistsRaw.map((artist) => getArtistRecommendedTracks(artist.id))
-  //       )
-  //         // Get audio metadata from recommended tracks
-  //         .then((data) => {
-  //           return Promise.all(data.map((tracks) => getTrackMeta(tracks))).then(
-  //             (data) => data.map((obj) => obj.audio_features)
-  //           );
-  //         })
-  //         // Flatten data in array
-  //         .then((data) => {
-  //           let flattened = data.flat(1);
-  //           return flattened;
-  //         })
-  //         // Calculate color factor
-  //         .then((data) => {
-  //           return data.map((track) =>
-  //             colorArray
-  //               .filter(
-  //                 (obj) =>
-  //                   obj.value ===
-  //                   Number((track.energy * track.valence).toFixed(4))
-  //               )
-  //               .map((color) => color.name)
-  //           );
-  //         })
-  //         // Flatten data in array
-  //         .then((data) => {
-  //           let flattened = data.flat(1);
-  //           return flattened;
-  //         })
-  //         // generate group count
-  //         .then((data) => {
-  //           const groupByColor = colorArray
-  //             .map((color) => ({
-  //               color: color,
-  //               count: data.filter((item) => item == color.name).length,
-  //               percentage: Math.round(
-  //                 (data.filter((item) => item == color.name).length /
-  //                   data.length) *
-  //                   100
-  //               ),
-  //             }))
-  //             .filter((obj) => obj.count > 0);
-  //           return groupByColor;
-  //         })
-  //         // Generate search prompt
-  //         .then((data) => {
-  //           const shuffleArray = (array) => {
-  //             for (let i = array.length - 1; i > 0; i--) {
-  //               const j = Math.floor(Math.random() * (i + 1));
-  //               const temp = array[i];
-  //               array[i] = array[j];
-  //               array[j] = temp;
-  //             }
-  //           };
-  //           // Shuffle colors in case n > 30 (using Fisher-Yates randomization)
-  //           shuffleArray(data);
-  //           const colorClause = data
-  //             .map((obj) => obj.color.name)
-  //             .slice(0, 30)
-  //             .join(", ");
-  //           return `An oil painting in the style of Jackson Pollock using the following colors: ${colorClause}`;
-  //         })
-  //         // Set variable
-  //         .then((data) => {
-  //           setColorPrompt(data);
-  //         });
-  //     });
+  //     const generateColorPrompt = () => {
+  //       spotifyApi.getMyTopArtists({ limit: 25 }).then(function (data) {
+  //         let topArtistsRaw = data.body.items;
+  //         // Generate full recommended track array from top artist list
+  //         Promise.all(
+  //           topArtistsRaw.map((artist) => getArtistRecommendedTracks(artist.id))
+  //         )
+  //           // Get audio metadata from recommended tracks
+  //           .then((data) => {
+  //             return Promise.all(
+  //               data.map((tracks) => getTrackMeta(tracks))
+  //             ).then((data) => data.map((obj) => obj.audio_features));
+  //           })
+  //           // Flatten data in array
+  //           .then((data) => {
+  //             let flattened = data.flat(1);
+  //             return flattened;
+  //           })
+  //           // Calculate color factor
+  //           .then((data) => {
+  //             return data.map((track) =>
+  //               colorArray
+  //                 .filter(
+  //                   (obj) =>
+  //                     obj.value ===
+  //                     Number((track.energy * track.valence).toFixed(4))
+  //                 )
+  //                 .map((color) => color.name)
+  //             );
+  //           })
+  //           // Flatten data in array
+  //           .then((data) => {
+  //             let flattened = data.flat(1);
+  //             return flattened;
+  //           })
+  //           // generate group count
+  //           .then((data) => {
+  //             const groupByColor = colorArray
+  //               .map((color) => ({
+  //                 color: color,
+  //                 count: data.filter((item) => item == color.name).length,
+  //                 percentage: Math.round(
+  //                   (data.filter((item) => item == color.name).length /
+  //                     data.length) *
+  //                     100
+  //                 ),
+  //               }))
+  //               .filter((obj) => obj.count > 0);
+  //             return groupByColor;
+  //           })
+  //           // Generate search prompt
+  //           .then((data) => {
+  //             const shuffleArray = (array) => {
+  //               for (let i = array.length - 1; i > 0; i--) {
+  //                 const j = Math.floor(Math.random() * (i + 1));
+  //                 const temp = array[i];
+  //                 array[i] = array[j];
+  //                 array[j] = temp;
+  //               }
+  //             };
+  //             // Shuffle colors in case n > 30 (using Fisher-Yates randomization)
+  //             shuffleArray(data);
+  //             const colorClause = data
+  //               .map((obj) => obj.color.name)
+  //               .slice(0, 30)
+  //               .join(", ");
+  //             return `An oil painting in the style of Jackson Pollock using the following colors: ${colorClause}`;
+  //           })
+  //           // Set variable
+  //           .then((data) => {
+  //             setColorPrompt(data);
+  //           });
+  //       });
+  //     };
+  //     generateColorPrompt();
   //   }
   // }, [session]);
 

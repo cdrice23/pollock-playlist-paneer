@@ -24,6 +24,8 @@ import {
   loadingState,
 } from "@/components/atoms";
 import Loader from "@/components/Loader";
+import ImageResult from "@/components/ImageResult";
+import styles from "../styles/Result.module.css";
 
 export default function Result() {
   const spotifyApi = useSpotify();
@@ -49,6 +51,7 @@ export default function Result() {
     }, 10000);
   }, []);
 
+  console.log(colorPrompt);
   console.log(loading);
 
   return (
@@ -56,10 +59,24 @@ export default function Result() {
       <AppBar>
         <Toolbar>
           <Box flexGrow={1}></Box>
-          <Button color="inherit" sx={{ display: { xs: "none", sm: "block" } }}>
-            Buy Me a Coffee!
-          </Button>
-          <Button color="inherit" sx={{ display: { xs: "none", sm: "block" } }}>
+          <Link
+            href="https://www.buymeacoffee.com/cdrice23"
+            target="_blank"
+            passHref
+            className={styles.link}
+          >
+            <Button
+              color="inherit"
+              sx={{ display: { xs: "none", sm: "block" } }}
+            >
+              Buy Me a Coffee!
+            </Button>
+          </Link>
+          <Button
+            color="inherit"
+            sx={{ display: { xs: "none", sm: "block" } }}
+            onClick={() => signOut()}
+          >
             Log Out
           </Button>
           <IconButton
@@ -74,6 +91,7 @@ export default function Result() {
               <Link
                 href="https://www.buymeacoffee.com/cdrice23"
                 target="_blank"
+                className={styles.link}
               >
                 Buy Me a Coffee!
               </Link>
@@ -84,11 +102,19 @@ export default function Result() {
       </AppBar>
       <Toolbar />
       {loading ? (
-        <Loader />
+        <>
+          <Loader />
+          <Box display={"flex"} justifyContent="center">
+            <Typography variant="h3" display={"inline-block"}>
+              Painting
+            </Typography>
+            <Typography variant="h3" className={styles.loading}>
+              ...
+            </Typography>
+          </Box>
+        </>
       ) : (
-        <Box>
-          <Typography variant="h3">Here's Your Slop</Typography>
-        </Box>
+        <ImageResult session={session} />
       )}
     </>
   );
