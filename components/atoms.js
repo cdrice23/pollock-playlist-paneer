@@ -14,3 +14,8 @@ export const colorPromptState = atom({
   key: "colorPrompt",
   default: "",
 });
+
+export const errorModalOpenState = atom({
+  key: "errorModalOpen",
+  default: false,
+});

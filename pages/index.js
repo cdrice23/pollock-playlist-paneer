@@ -12,6 +12,8 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
+  Modal,
+  Paper,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -179,32 +181,78 @@ export default function Home() {
     { name: "Maroon", value: 1 },
   ];
 
-  // Backoff retry generalized
-  const retryOperation = (fn) => {
-    let currentAttempt = 0;
+  // Backoff retry generalized - v1
+  // const retryOperation = (fn) => {
+  //   let currentAttempt = 0;
 
-    while (true) {
+  //   while (true) {
+  //     try {
+  //       fn();
+  //       console.log("Operation successful.");
+  //       break;
+  //     } catch (error) {
+  //       if (currentAttempt >= 3) {
+  //         console.log(`Max retries attempted. Exiting function.`);
+  //         break;
+  //       }
+  //       console.log(`Operation failed. Reattempting in 5 seconds.`);
+  //       setTimeout(() => {
+  //         console.log(
+  //           `Reattempting. Current attempt before increment ${currentAttempt}`
+  //         );
+  //         currentAttempt++;
+  //         console.log(`Current attempt after increment ${currentAttempt}`);
+  //       }, 5000);
+  //     }
+  //   }
+  // };
+
+  // Backoff retry generalized - v2
+  const retryOperation = async (fn, maxAttempts = 3, delayInSeconds = 5) => {
+    const execute = async (currentAttempt) => {
       try {
-        fn();
-        console.log("Operation successful.");
-        break;
+        return await fn();
       } catch (error) {
-        currentAttempt++;
-        console.log(`Operation failed. Attempt #${currentAttempt}`);
-        console.log(error);
-        if (currentAttempt >= 3) {
-          console.log(`Max retries attempted. Exiting function.`);
-          break;
+        if (currentAttempt <= maxAttempts) {
+          console.log(`Current attempt is ${currentAttempt}`);
+          const nextAttempt = currentAttempt + 1;
+          console.error(
+            `Retrying after ${delayInSeconds} seconds due to: `,
+            error
+          );
+          return delay(() => {
+            console.log(`Next attempt is ${nextAttempt}`);
+            execute(nextAttempt);
+          }, delayInSeconds * 1000);
+        } else {
+          throw "Max attempts reached. Terminating operation.";
         }
       }
-    }
+    };
+    console.log();
+    return execute(1);
   };
+
+  const delay = (fn, ms) =>
+    new Promise((resolve) => setTimeout(() => resolve(fn()), ms));
+
+  const countdown = (remainingTime) => {
+    if (remainingTime <= 0) {
+      console.log("End of time");
+      return remainingTime;
+    }
+    console.log(`Time Remaining: ${remainingTime} seconds`);
+    remainingTime--;
+    setTimeout(() => countdown(remainingTime), 1000);
+  };
+
+  countdown(10);
 
   const exampleService = () => {
-    return false;
+    throw "Sample Failure";
   };
 
-  retryOperation(exampleService());
+  // retryOperation(exampleService);
 
   // useEffect(() => {
   //   // Ensure access token is available from custom Spotify hook
