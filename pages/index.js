@@ -23,7 +23,11 @@ import useSpotify from "@/hooks/useSpotify";
 import Link from "next/link";
 import { useRecoilState } from "recoil";
 import { useRouter } from "next/router";
-import { colorPromptState, loadingState } from "@/components/atoms";
+import {
+  colorPromptState,
+  loadingState,
+  errorModalOpenState,
+} from "@/components/atoms";
 import styles from "../styles/Home.module.css";
 
 export default function Home() {
@@ -31,15 +35,24 @@ export default function Home() {
   const { data: session, status } = useSession();
   const [colorPrompt, setColorPrompt] = useRecoilState(colorPromptState);
   const [loading, setLoading] = useRecoilState(loadingState);
+  const [errorModalOpen, setErrorModalOpen] =
+    useRecoilState(errorModalOpenState);
+  const [remainingTime, setRemainingTime] = useState(0);
   const [anchorEl, setAnchorEl] = useState(null);
   const router = useRouter();
 
-  const open = Boolean(anchorEl);
+  const menuOpen = Boolean(anchorEl);
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
   };
-  const handleClose = () => {
+  const handleMenuClose = () => {
     setAnchorEl(null);
+  };
+  const handleModalOpen = () => {
+    setErrorModalOpen(true);
+  };
+  const handleModalClose = () => {
+    setErrorModalOpen(false);
   };
   const handleGenerate = () => {
     setLoading(true);
@@ -208,51 +221,58 @@ export default function Home() {
   // };
 
   // Backoff retry generalized - v2
+  // const retryOperation = async (fn, maxAttempts = 3, delayInSeconds = 5) => {
+  //   const execute = async (currentAttempt) => {
+  //     try {
+  //       return await fn();
+  //     } catch (error) {
+  //       if (currentAttempt <= maxAttempts) {
+  //         // setErrorModalOpen(true);
+  //         console.log(`Current attempt is ${currentAttempt}`);
+  //         const nextAttempt = currentAttempt + 1;
+  //         console.error(
+  //           `Retrying after ${delayInSeconds} seconds due to: `,
+  //           error
+  //         );
+  //         return delay(() => {
+  //           console.log(`Next attempt is ${nextAttempt}`);
+  //           execute(nextAttempt);
+  //         }, delayInSeconds * 1000);
+  //         // countdown(delayInSeconds);
+  //       } else {
+  //         throw "Max attempts reached. Terminating operation.";
+  //       }
+  //     }
+  //   };
+  //   return execute(1);
+  // };
+
+  // Backoff retry generalized - v3
   const retryOperation = async (fn, maxAttempts = 3, delayInSeconds = 5) => {
-    const execute = async (currentAttempt) => {
+    let attempts = 0;
+    while (attempts < maxAttempts) {
       try {
         return await fn();
       } catch (error) {
-        if (currentAttempt <= maxAttempts) {
-          console.log(`Current attempt is ${currentAttempt}`);
-          const nextAttempt = currentAttempt + 1;
-          console.error(
-            `Retrying after ${delayInSeconds} seconds due to: `,
-            error
-          );
-          return delay(() => {
-            console.log(`Next attempt is ${nextAttempt}`);
-            execute(nextAttempt);
-          }, delayInSeconds * 1000);
-        } else {
-          throw "Max attempts reached. Terminating operation.";
+        attempts++;
+        console.log(`Current attempt is #${attempts} due to error: ${error}`);
+        setRemainingTime(delayInSeconds);
+        while (remainingTime > 0) {
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          setRemainingTime(remainingTime - 1);
         }
+        setErrorModalOpen(true);
       }
-    };
-    console.log();
-    return execute(1);
-  };
-
-  const delay = (fn, ms) =>
-    new Promise((resolve) => setTimeout(() => resolve(fn()), ms));
-
-  const countdown = (remainingTime) => {
-    if (remainingTime <= 0) {
-      console.log("End of time");
-      return remainingTime;
     }
-    console.log(`Time Remaining: ${remainingTime} seconds`);
-    remainingTime--;
-    setTimeout(() => countdown(remainingTime), 1000);
+    setErrorModalOpen(false);
+    console.log(`Maximum number of attempts reached. Terminating operation.`);
   };
-
-  countdown(10);
 
   const exampleService = () => {
     throw "Sample Failure";
   };
 
-  // retryOperation(exampleService);
+  retryOperation(exampleService);
 
   // useEffect(() => {
   //   // Ensure access token is available from custom Spotify hook
@@ -371,7 +391,7 @@ export default function Home() {
           >
             <MenuIcon />
           </IconButton>
-          <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
+          <Menu anchorEl={anchorEl} open={menuOpen} onClose={handleMenuClose}>
             <MenuItem>
               <Link
                 href="https://www.buymeacoffee.com/cdrice23"
@@ -485,6 +505,11 @@ export default function Home() {
           <Typography variant="h6">Generate My Painting!</Typography>
         </Button>
       </Box>
+      <Modal open={errorModalOpen} onClose={handleModalClose}>
+        <Paper className={styles.errorModal}>
+          <Typography>Test Text</Typography>
+        </Paper>
+      </Modal>
     </>
   );
 }
