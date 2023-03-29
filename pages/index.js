@@ -38,6 +38,7 @@ export default function Home() {
   const [errorModalOpen, setErrorModalOpen] =
     useRecoilState(errorModalOpenState);
   const [remainingTime, setRemainingTime] = useState(0);
+  const [userClosed, setUserClosed] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const router = useRouter();
 
@@ -53,6 +54,7 @@ export default function Home() {
   };
   const handleModalClose = () => {
     setErrorModalOpen(false);
+    setUserClosed(true);
   };
   const handleGenerate = () => {
     setLoading(true);
@@ -226,8 +228,8 @@ export default function Home() {
   //     try {
   //       return await fn();
   //     } catch (error) {
+  //       userClosed ?? setErrorModalOpen(true);
   //       if (currentAttempt <= maxAttempts) {
-  //         // setErrorModalOpen(true);
   //         console.log(`Current attempt is ${currentAttempt}`);
   //         const nextAttempt = currentAttempt + 1;
   //         console.error(
@@ -239,34 +241,87 @@ export default function Home() {
   //           execute(nextAttempt);
   //         }, delayInSeconds * 1000);
   //         // countdown(delayInSeconds);
-  //       } else {
-  //         throw "Max attempts reached. Terminating operation.";
   //       }
+  //       console.log("Max attempts reached. Terminating operation.");
   //     }
   //   };
   //   return execute(1);
   // };
 
   // Backoff retry generalized - v3
-  const retryOperation = async (fn, maxAttempts = 3, delayInSeconds = 5) => {
-    let attempts = 0;
-    while (attempts < maxAttempts) {
-      try {
-        return await fn();
-      } catch (error) {
-        attempts++;
-        console.log(`Current attempt is #${attempts} due to error: ${error}`);
-        setRemainingTime(delayInSeconds);
-        while (remainingTime > 0) {
-          await new Promise((resolve) => setTimeout(resolve, 1000));
-          setRemainingTime(remainingTime - 1);
-        }
-        setErrorModalOpen(true);
+  // const retryOperation = async (fn, maxAttempts = 3, delayInSeconds = 5) => {
+  //   const [errorModalOpen, setErrorModalOpen] =
+  //     useRecoilState(errorModalOpenState);
+  //   const [remainingTime, setRemainingTime] = useState(0);
+  //   let attempts = 0;
+  //   while (attempts < maxAttempts) {
+  //     try {
+  //       return await fn();
+  //     } catch (error) {
+  //       attempts++;
+  //       console.log(`Current attempt is #${attempts} due to error: ${error}`);
+  //       setRemainingTime(delayInSeconds * 1000);
+  //       let timeoutId = setTimeout(() => {
+  //         setRemainingTime(0);
+  //       }, delayInSeconds * 1000);
+  //       while (remainingTime > 0) {
+  //         await new Promise((resolve) => setTimeout(resolve, 1000));
+  //         setRemainingTime(remainingTime - 1000);
+  //         if (remainingTime === 0) {
+  //           clearTimeout(timeoutId);
+  //           console.log("Timeout Occurred.");
+  //         }
+  //       }
+  //       setErrorModalOpen(true);
+  //     }
+  //   }
+  //   setErrorModalOpen(false);
+  //   console.log(`Maximum number of attempts reached. Terminating operation.`);
+  // };
+
+  // Backoff retry function - v4 (functional)
+  const retryOperation = async (fn, maxAttempts = 3, delayInSeconds = 3) => {
+    try {
+      return await fn();
+    } catch (error) {
+      for (let attempts = 1; attempts <= maxAttempts; attempts++) {
+        setTimeout(() => {
+          countdown(delayInSeconds);
+          console.log(
+            "Operation failed. Attempts: " +
+              attempts +
+              " Time elapsed: " +
+              (attempts - 1) * delayInSeconds
+          );
+        }, (attempts - 1) * delayInSeconds * 1000);
       }
     }
-    setErrorModalOpen(false);
-    console.log(`Maximum number of attempts reached. Terminating operation.`);
   };
+
+  const delay = (fn, ms) =>
+    new Promise((resolve) => setTimeout(() => resolve(fn()), ms));
+
+  // countdown v1
+  // const countdown = (remainingTime) => {
+  //   if (remainingTime <= 0) {
+  //     console.log("End of time");
+  //     return remainingTime;
+  //   }
+  //   console.log(`Time Remaining: ${remainingTime} seconds`);
+  //   remainingTime--;
+  //   setTimeout(() => countdown(remainingTime), 1000);
+  // };
+
+  // countdown v2
+  const countdown = (countTo) => {
+    for (let i = countTo; i > 0; i--) {
+      setTimeout(() => {
+        console.log(i);
+      }, (countTo - i) * 1000);
+    }
+  };
+
+  // countdown(5);
 
   const exampleService = () => {
     throw "Sample Failure";
