@@ -1,5 +1,5 @@
 import React from "react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Box,
   Button,
@@ -29,16 +29,19 @@ import {
   errorModalOpenState,
 } from "@/components/atoms";
 import styles from "../styles/Home.module.css";
+import ErrorModal from "@/components/ErrorModal";
 
 export default function Home() {
   const spotifyApi = useSpotify();
   const { data: session, status } = useSession();
   const [colorPrompt, setColorPrompt] = useRecoilState(colorPromptState);
   const [loading, setLoading] = useRecoilState(loadingState);
-  const [errorModalOpen, setErrorModalOpen] =
-    useRecoilState(errorModalOpenState);
+  // const [errorModalOpen, setErrorModalOpen] =
+  //   useRecoilState(errorModalOpenState);
+  const errorModalOpen = useRef(false);
   const [remainingTime, setRemainingTime] = useState(0);
-  const [userClosed, setUserClosed] = useState(false);
+  // const [userClosed, setUserClosed] = useState(false);
+  const userClosed = useRef(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const router = useRouter();
 
@@ -50,11 +53,13 @@ export default function Home() {
     setAnchorEl(null);
   };
   const handleModalOpen = () => {
-    setErrorModalOpen(true);
+    // setErrorModalOpen(true);
+    errorModalOpen.current = true;
   };
   const handleModalClose = () => {
-    setErrorModalOpen(false);
-    setUserClosed(true);
+    // setErrorModalOpen(false);
+    userClosed.current = true;
+    errorModalOpen.current = false;
   };
   const handleGenerate = () => {
     setLoading(true);
@@ -284,6 +289,10 @@ export default function Home() {
     try {
       return await fn();
     } catch (error) {
+      // userClosed.current ? setErrorModalOpen(false) : setErrorModalOpen(true);
+      userClosed.current
+        ? (errorModalOpen.current = false)
+        : (errorModalOpen.current = true);
       for (let attempts = 1; attempts <= maxAttempts; attempts++) {
         setTimeout(() => {
           countdown(delayInSeconds);
@@ -294,25 +303,19 @@ export default function Home() {
               (attempts - 1) * delayInSeconds
           );
         }, (attempts - 1) * delayInSeconds * 1000);
+        if (attempts === maxAttempts && userClosed.current === true) {
+          errorModalOpen.current = false;
+          userClosed.current = false;
+        }
       }
     }
   };
 
-  const delay = (fn, ms) =>
-    new Promise((resolve) => setTimeout(() => resolve(fn()), ms));
+  // Delay - unused
+  // const delay = (fn, ms) =>
+  //   new Promise((resolve) => setTimeout(() => resolve(fn()), ms));
 
-  // countdown v1
-  // const countdown = (remainingTime) => {
-  //   if (remainingTime <= 0) {
-  //     console.log("End of time");
-  //     return remainingTime;
-  //   }
-  //   console.log(`Time Remaining: ${remainingTime} seconds`);
-  //   remainingTime--;
-  //   setTimeout(() => countdown(remainingTime), 1000);
-  // };
-
-  // countdown v2
+  // countdown v2 (functional)
   const countdown = (countTo) => {
     for (let i = countTo; i > 0; i--) {
       setTimeout(() => {
@@ -320,8 +323,6 @@ export default function Home() {
       }, (countTo - i) * 1000);
     }
   };
-
-  // countdown(5);
 
   const exampleService = () => {
     throw "Sample Failure";
@@ -560,11 +561,7 @@ export default function Home() {
           <Typography variant="h6">Generate My Painting!</Typography>
         </Button>
       </Box>
-      <Modal open={errorModalOpen} onClose={handleModalClose}>
-        <Paper className={styles.errorModal}>
-          <Typography>Test Text</Typography>
-        </Paper>
-      </Modal>
+      <ErrorModal />
     </>
   );
 }
