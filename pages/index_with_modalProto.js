@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Box,
   Button,
@@ -12,6 +12,8 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
+  Modal,
+  Paper,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -29,46 +31,71 @@ import {
 import styles from "../styles/Home.module.css";
 
 export default function Home() {
-  // state and non-functional variables
   const spotifyApi = useSpotify();
   const { data: session, status } = useSession();
   const [colorPrompt, setColorPrompt] = useRecoilState(colorPromptState);
   const [loading, setLoading] = useRecoilState(loadingState);
+  // const [errorModalOpen, setErrorModalOpen] =
+  //   useRecoilState(errorModalOpenState);
+  // const [errorModalOpen, setErrorModalOpen] = useState(false);
+  let errorModalOpen = "hide";
+  // const errorModalOpen = useRef(false);
+  console.log(errorModalOpen);
+  const [remainingTime, setRemainingTime] = useState(0);
+  // const [userClosed, setUserClosed] = useState(false);
+  const userClosed = useRef(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const router = useRouter();
-  const menuOpen = Boolean(anchorEl);
 
-  // handlers
+  const menuOpen = Boolean(anchorEl);
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
   };
   const handleMenuClose = () => {
     setAnchorEl(null);
   };
+  // const handleModalOpen = () => {
+  //   // setErrorModalOpen(true);
+  //   // errorModalOpen.current = true;
+  // };
+
+  // const handleModalClose = () => {
+  //   setErrorModalOpen(false);
+  // };
+
+  const handleModalOpen = useCallback((newValue) => {
+    if (newValue !== errorModalOpen) {
+      setErrorModalOpen(true);
+    }
+  }, []);
+
+  const handleModalClose = useCallback((newValue) => {
+    if (newValue !== errorModalOpen) {
+      setErrorModalOpen(false);
+    }
+    // setErrorModalOpen(false);
+    // setUserClosed(true);
+    // userClosed.current = true;
+    // errorModalOpen.current = false;
+  }, []);
+
+  const handleModalChange = useCallback((newValue) => {
+    if (newValue !== errorModalOpen) {
+      setErrorModalOpen(newValue);
+    }
+    // setErrorModalOpen(false);
+    // setUserClosed(true);
+    // userClosed.current = true;
+    // errorModalOpen.current = false;
+  }, []);
+
   const handleGenerate = () => {
     setLoading(true);
     router.push("/result");
   };
 
   // helpers
-  // Get track recommendations from an artist (functional)
-  // const getArtistRecommendedTracks = (artist) =>
-  //   spotifyApi
-  //     .getRecommendations({
-  //       seed_artists: artist,
-  //       limit: 100,
-  //     })
-  //     .then(
-  //       function (data) {
-  //         let recommendations = data.body;
-  //         // console.log(recommendations);
-  //         return recommendations.tracks.map((track) => track.id);
-  //       },
-  //       function (err) {
-  //         console.log(err);
-  //       }
-  //     );
-
+  // Get track recommendations from an artist
   const getArtistRecommendedTracks = (artist) =>
     spotifyApi
       .getRecommendations({
@@ -78,6 +105,7 @@ export default function Home() {
       .then(
         function (data) {
           let recommendations = data.body;
+          // console.log(recommendations);
           return recommendations.tracks.map((track) => track.id);
         },
         function (err) {
@@ -201,15 +229,119 @@ export default function Home() {
     { name: "Maroon", value: 1 },
   ];
 
-  // Backoff retry operation
+  // Backoff retry generalized - v1
+  // const retryOperation = (fn) => {
+  //   let currentAttempt = 0;
+
+  //   while (true) {
+  //     try {
+  //       fn();
+  //       console.log("Operation successful.");
+  //       break;
+  //     } catch (error) {
+  //       if (currentAttempt >= 3) {
+  //         console.log(`Max retries attempted. Exiting function.`);
+  //         break;
+  //       }
+  //       console.log(`Operation failed. Reattempting in 5 seconds.`);
+  //       setTimeout(() => {
+  //         console.log(
+  //           `Reattempting. Current attempt before increment ${currentAttempt}`
+  //         );
+  //         currentAttempt++;
+  //         console.log(`Current attempt after increment ${currentAttempt}`);
+  //       }, 5000);
+  //     }
+  //   }
+  // };
+
+  // Backoff retry generalized - v2
+  // const retryOperation = async (fn, maxAttempts = 3, delayInSeconds = 5) => {
+  //   const execute = async (currentAttempt) => {
+  //     try {
+  //       return await fn();
+  //     } catch (error) {
+  //       userClosed ?? setErrorModalOpen(true);
+  //       if (currentAttempt <= maxAttempts) {
+  //         console.log(`Current attempt is ${currentAttempt}`);
+  //         const nextAttempt = currentAttempt + 1;
+  //         console.error(
+  //           `Retrying after ${delayInSeconds} seconds due to: `,
+  //           error
+  //         );
+  //         return delay(() => {
+  //           console.log(`Next attempt is ${nextAttempt}`);
+  //           execute(nextAttempt);
+  //         }, delayInSeconds * 1000);
+  //         // countdown(delayInSeconds);
+  //       }
+  //       console.log("Max attempts reached. Terminating operation.");
+  //     }
+  //   };
+  //   return execute(1);
+  // };
+
+  // Backoff retry generalized - v3
+  // const retryOperation = async (fn, maxAttempts = 3, delayInSeconds = 5) => {
+  //   const [errorModalOpen, setErrorModalOpen] =
+  //     useRecoilState(errorModalOpenState);
+  //   const [remainingTime, setRemainingTime] = useState(0);
+  //   let attempts = 0;
+  //   while (attempts < maxAttempts) {
+  //     try {
+  //       return await fn();
+  //     } catch (error) {
+  //       attempts++;
+  //       console.log(`Current attempt is #${attempts} due to error: ${error}`);
+  //       setRemainingTime(delayInSeconds * 1000);
+  //       let timeoutId = setTimeout(() => {
+  //         setRemainingTime(0);
+  //       }, delayInSeconds * 1000);
+  //       while (remainingTime > 0) {
+  //         await new Promise((resolve) => setTimeout(resolve, 1000));
+  //         setRemainingTime(remainingTime - 1000);
+  //         if (remainingTime === 0) {
+  //           clearTimeout(timeoutId);
+  //           console.log("Timeout Occurred.");
+  //         }
+  //       }
+  //       setErrorModalOpen(true);
+  //     }
+  //   }
+  //   setErrorModalOpen(false);
+  //   console.log(`Maximum number of attempts reached. Terminating operation.`);
+  // };
+
+  // Backoff retry function - v4 (functional)
+  // const retryOperation = async (fn, maxAttempts = 3, delayInSeconds = 3) => {
+  //   try {
+  //     return await fn();
+  //   } catch (error) {
+  //     for (let attempts = 1; attempts <= maxAttempts; attempts++) {
+  //       setTimeout(() => {
+  //         countdown(delayInSeconds);
+  //         console.log(
+  //           "Operation failed. Attempts: " +
+  //             attempts +
+  //             " Time elapsed: " +
+  //             (attempts - 1) * delayInSeconds
+  //         );
+  //       }, (attempts - 1) * delayInSeconds * 1000);
+  //     }
+  //   }
+  // };
+
+  // Retry v5
   const retryOperation = async (fn, maxAttempts = 3, delayInSeconds = 3) => {
     let attempts = 0;
     while (attempts < maxAttempts) {
       try {
-        let result = await fn();
-        console.log("Success!");
-        return result;
+        return await fn();
       } catch (error) {
+        errorModalOpen = "show";
+        // handleModalOpen(true);
+        // setErrorModalOpen(true);
+        // errorModalOpen.current = true;
         attempts++;
         console.log(`Attempt ${attempts} failed: ${error}`);
         console.log(errorModalOpen);
@@ -218,149 +350,117 @@ export default function Home() {
         );
       }
     }
+    // errorModalOpen.current = false;
+    errorModalOpen = "hide";
     console.log(`Maximum number of attempts (${maxAttempts}) reached.`);
+    // handleModalClose(false);
+    console.log(errorModalOpen);
+    // setErrorModalOpen(false);
   };
 
-  // Spotify-specific retry
-  const callSpotifyWithRetry = async (
-    fn,
-    currentRetries = 0,
-    maxRetries = 10
-  ) => {
-    try {
-      return await fn();
-    } catch (err) {
-      if (currentRetries <= maxRetries) {
-        console.log("Retry number: " + currentRetries);
-        if (err && err.statusCode === 429) {
-          const retryAfter =
-            (parseInt(e.headers["retry-after"], 10) + 1) * 1000;
-          console.log(
-            "Retrying after " + retryAfter.toString() / 1000 + " seconds."
-          );
-          await new Promise((resolve) => setTimeout(resolve, retryAfter));
-        }
-        return await callSpotifyWithRetry(fn, currentRetries + 1);
-      } else {
-        console.log("Caught here.");
-        throw err;
-      }
-    }
-  };
-
-  // Delay (functional) - unused
+  // Delay - unused
   // const delay = (fn, ms) =>
   //   new Promise((resolve) => setTimeout(() => resolve(fn()), ms));
 
   // countdown v2 (functional)
-  // const countdown = (countTo) => {
-  //   for (let i = countTo; i > 0; i--) {
-  //     setTimeout(() => {
-  //       console.log(i);
-  //     }, (countTo - i) * 1000);
-  //   }
-  // };
-
-  useEffect(() => {
-    // Ensure access token is available from custom Spotify hook
-    if (spotifyApi.getAccessToken()) {
-      // Fetch top artist data from user
-      const generateColorPrompt = () => {
-        spotifyApi.getMyTopArtists({ limit: 25 }).then(function (data) {
-          let topArtistsRaw = data.body.items;
-          // Generate full recommended track array from top artist list
-          Promise.all(
-            topArtistsRaw.map(
-              // async (artist) => await getArtistRecommendedTracks(artist.id)
-              async (artist) =>
-                await callSpotifyWithRetry(
-                  async () => await getArtistRecommendedTracks(artist.id)
-                )
-            )
-          )
-            // Get audio metadata from recommended tracks
-            .then((data) => {
-              return Promise.all(
-                data.map(
-                  async (tracks) =>
-                    await callSpotifyWithRetry(
-                      async () => await getTrackMeta(tracks)
-                    )
-                )
-              ).then((data) => data.map((obj) => obj.audio_features));
-            })
-            // Flatten data in array
-            .then((data) => {
-              let flattened = data.flat(1);
-              return flattened;
-            })
-            // Calculate color factor
-            .then((data) => {
-              return data.map((track) =>
-                colorArray
-                  .filter(
-                    (obj) =>
-                      obj.value ===
-                      Number((track.energy * track.valence).toFixed(4))
-                  )
-                  .map((color) => color.name)
-              );
-            })
-            // Flatten data in array
-            .then((data) => {
-              let flattened = data.flat(1);
-              return flattened;
-            })
-            // generate group count
-            .then((data) => {
-              const groupByColor = colorArray
-                .map((color) => ({
-                  color: color,
-                  count: data.filter((item) => item == color.name).length,
-                  percentage: Math.round(
-                    (data.filter((item) => item == color.name).length /
-                      data.length) *
-                      100
-                  ),
-                }))
-                .filter((obj) => obj.count > 0);
-              return groupByColor;
-            })
-            // Generate search prompt
-            .then((data) => {
-              const shuffleArray = (array) => {
-                for (let i = array.length - 1; i > 0; i--) {
-                  const j = Math.floor(Math.random() * (i + 1));
-                  const temp = array[i];
-                  array[i] = array[j];
-                  array[j] = temp;
-                }
-              };
-              // Shuffle colors in case n > 30 (using Fisher-Yates randomization)
-              shuffleArray(data);
-              const colorClause = data
-                .map((obj) => obj.color.name)
-                .slice(0, 30)
-                .join(", ");
-              return `An oil painting in the style of Jackson Pollock using the following colors: ${colorClause}`;
-            })
-            // Set variable
-            .then((data) => {
-              setColorPrompt(data);
-            });
-          // // Catch errors
-          // .catch((error) => {
-          //   console.log(error);
-          // });
-        });
-      };
-      // Use backoff retry in case of error
-      retryOperation(generateColorPrompt);
+  const countdown = (countTo) => {
+    for (let i = countTo; i > 0; i--) {
+      setTimeout(() => {
+        console.log(i);
+      }, (countTo - i) * 1000);
     }
-  }, [session]);
+  };
 
-  console.log(colorPrompt);
-  console.log(loading);
+  const exampleService = async () => {
+    throw "Sample Failure";
+  };
+
+  retryOperation(exampleService);
+
+  // useEffect(() => {
+  //   // Ensure access token is available from custom Spotify hook
+  //   if (spotifyApi.getAccessToken()) {
+  //     // Fetch top artist data from user
+  //     const generateColorPrompt = () => {
+  //       spotifyApi.getMyTopArtists({ limit: 25 }).then(function (data) {
+  //         let topArtistsRaw = data.body.items;
+  //         // Generate full recommended track array from top artist list
+  //         Promise.all(
+  //           topArtistsRaw.map((artist) => getArtistRecommendedTracks(artist.id))
+  //         )
+  //           // Get audio metadata from recommended tracks
+  //           .then((data) => {
+  //             return Promise.all(
+  //               data.map((tracks) => getTrackMeta(tracks))
+  //             ).then((data) => data.map((obj) => obj.audio_features));
+  //           })
+  //           // Flatten data in array
+  //           .then((data) => {
+  //             let flattened = data.flat(1);
+  //             return flattened;
+  //           })
+  //           // Calculate color factor
+  //           .then((data) => {
+  //             return data.map((track) =>
+  //               colorArray
+  //                 .filter(
+  //                   (obj) =>
+  //                     obj.value ===
+  //                     Number((track.energy * track.valence).toFixed(4))
+  //                 )
+  //                 .map((color) => color.name)
+  //             );
+  //           })
+  //           // Flatten data in array
+  //           .then((data) => {
+  //             let flattened = data.flat(1);
+  //             return flattened;
+  //           })
+  //           // generate group count
+  //           .then((data) => {
+  //             const groupByColor = colorArray
+  //               .map((color) => ({
+  //                 color: color,
+  //                 count: data.filter((item) => item == color.name).length,
+  //                 percentage: Math.round(
+  //                   (data.filter((item) => item == color.name).length /
+  //                     data.length) *
+  //                     100
+  //                 ),
+  //               }))
+  //               .filter((obj) => obj.count > 0);
+  //             return groupByColor;
+  //           })
+  //           // Generate search prompt
+  //           .then((data) => {
+  //             const shuffleArray = (array) => {
+  //               for (let i = array.length - 1; i > 0; i--) {
+  //                 const j = Math.floor(Math.random() * (i + 1));
+  //                 const temp = array[i];
+  //                 array[i] = array[j];
+  //                 array[j] = temp;
+  //               }
+  //             };
+  //             // Shuffle colors in case n > 30 (using Fisher-Yates randomization)
+  //             shuffleArray(data);
+  //             const colorClause = data
+  //               .map((obj) => obj.color.name)
+  //               .slice(0, 30)
+  //               .join(", ");
+  //             return `An oil painting in the style of Jackson Pollock using the following colors: ${colorClause}`;
+  //           })
+  //           // Set variable
+  //           .then((data) => {
+  //             setColorPrompt(data);
+  //           });
+  //       });
+  //     };
+  //     generateColorPrompt();
+  //   }
+  // }, [session]);
+
+  // console.log(colorPrompt);
+  // console.log(loading);
 
   return (
     <>
@@ -508,6 +608,13 @@ export default function Home() {
           <Typography variant="h6">Generate My Painting!</Typography>
         </Button>
       </Box>
+      {/* <Modal open={errorModalOpen} onClose={() => handleModalChange(false)}>
+        <Paper className={styles.errorModal}>
+          <Typography>Test Text</Typography>
+        </Paper>
+      </Modal> */}
+
+      {errorModalOpen == "show" && <Box>We're on.</Box>}
     </>
   );
 }
