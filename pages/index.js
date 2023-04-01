@@ -27,12 +27,17 @@ import {
   errorModalOpenState,
 } from "@/components/atoms";
 import styles from "../styles/Home.module.css";
+import Cookies from "js-cookie";
 
-export default function Home() {
+function Home() {
   // state and non-functional variables
   const spotifyApi = useSpotify();
   const { data: session, status } = useSession();
-  const [colorPrompt, setColorPrompt] = useRecoilState(colorPromptState);
+  // const [colorPrompt, setColorPrompt] = useRecoilState(colorPromptState);
+  // const [colorPrompt, setColorPrompt] = useState(() =>
+  //   JSON.parse(initColorPrompt)
+  // );
+  const [colorPrompt, setColorPrompt] = useState("");
   const [loading, setLoading] = useRecoilState(loadingState);
   const [anchorEl, setAnchorEl] = useState(null);
   const router = useRouter();
@@ -262,105 +267,112 @@ export default function Home() {
   // };
 
   useEffect(() => {
-    // Ensure access token is available from custom Spotify hook
-    if (spotifyApi.getAccessToken()) {
-      // Fetch top artist data from user
-      const generateColorPrompt = () => {
-        spotifyApi.getMyTopArtists({ limit: 25 }).then(function (data) {
-          let topArtistsRaw = data.body.items;
-          // Generate full recommended track array from top artist list
-          Promise.all(
-            topArtistsRaw.map(
-              // async (artist) => await getArtistRecommendedTracks(artist.id)
-              async (artist) =>
-                await callSpotifyWithRetry(
-                  async () => await getArtistRecommendedTracks(artist.id)
-                )
-            )
-          )
-            // Get audio metadata from recommended tracks
-            .then((data) => {
-              return Promise.all(
-                data.map(
-                  async (tracks) =>
-                    await callSpotifyWithRetry(
-                      async () => await getTrackMeta(tracks)
-                    )
-                )
-              ).then((data) => data.map((obj) => obj.audio_features));
-            })
-            // Flatten data in array
-            .then((data) => {
-              let flattened = data.flat(1);
-              return flattened;
-            })
-            // Calculate color factor
-            .then((data) => {
-              return data.map((track) =>
-                colorArray
-                  .filter(
-                    (obj) =>
-                      obj.value ===
-                      Number((track.energy * track.valence).toFixed(4))
+    // Check if cached colorPrompt exists
+    if (Cookies.get("colorPrompt")) {
+      console.log("colorPrompt already generated.");
+    } else {
+      // Ensure access token is available from custom Spotify hook
+      if (spotifyApi.getAccessToken()) {
+        // Fetch top artist data from user
+        const generateColorPrompt = () => {
+          spotifyApi.getMyTopArtists({ limit: 25 }).then(function (data) {
+            let topArtistsRaw = data.body.items;
+            // Generate full recommended track array from top artist list
+            Promise.all(
+              topArtistsRaw.map(
+                // async (artist) => await getArtistRecommendedTracks(artist.id)
+                async (artist) =>
+                  await callSpotifyWithRetry(
+                    async () => await getArtistRecommendedTracks(artist.id)
                   )
-                  .map((color) => color.name)
-              );
-            })
-            // Flatten data in array
-            .then((data) => {
-              let flattened = data.flat(1);
-              return flattened;
-            })
-            // generate group count
-            .then((data) => {
-              const groupByColor = colorArray
-                .map((color) => ({
-                  color: color,
-                  count: data.filter((item) => item == color.name).length,
-                  percentage: Math.round(
-                    (data.filter((item) => item == color.name).length /
-                      data.length) *
-                      100
-                  ),
-                }))
-                .filter((obj) => obj.count > 0);
-              return groupByColor;
-            })
-            // Generate search prompt
-            .then((data) => {
-              const shuffleArray = (array) => {
-                for (let i = array.length - 1; i > 0; i--) {
-                  const j = Math.floor(Math.random() * (i + 1));
-                  const temp = array[i];
-                  array[i] = array[j];
-                  array[j] = temp;
-                }
-              };
-              // Shuffle colors in case n > 30 (using Fisher-Yates randomization)
-              shuffleArray(data);
-              const colorClause = data
-                .map((obj) => obj.color.name)
-                .slice(0, 30)
-                .join(", ");
-              return `An oil painting in the style of Jackson Pollock using the following colors: ${colorClause}`;
-            })
-            // Set variable
-            .then((data) => {
-              setColorPrompt(data);
-            });
-          // // Catch errors
-          // .catch((error) => {
-          //   console.log(error);
-          // });
-        });
-      };
-      // Use backoff retry in case of error
-      retryOperation(generateColorPrompt);
+              )
+            )
+              // Get audio metadata from recommended tracks
+              .then((data) => {
+                return Promise.all(
+                  data.map(
+                    async (tracks) =>
+                      await callSpotifyWithRetry(
+                        async () => await getTrackMeta(tracks)
+                      )
+                  )
+                ).then((data) => data.map((obj) => obj.audio_features));
+              })
+              // Flatten data in array
+              .then((data) => {
+                let flattened = data.flat(1);
+                return flattened;
+              })
+              // Calculate color factor
+              .then((data) => {
+                return data.map((track) =>
+                  colorArray
+                    .filter(
+                      (obj) =>
+                        obj.value ===
+                        Number((track.energy * track.valence).toFixed(4))
+                    )
+                    .map((color) => color.name)
+                );
+              })
+              // Flatten data in array
+              .then((data) => {
+                let flattened = data.flat(1);
+                return flattened;
+              })
+              // generate group count
+              .then((data) => {
+                const groupByColor = colorArray
+                  .map((color) => ({
+                    color: color,
+                    count: data.filter((item) => item == color.name).length,
+                    percentage: Math.round(
+                      (data.filter((item) => item == color.name).length /
+                        data.length) *
+                        100
+                    ),
+                  }))
+                  .filter((obj) => obj.count > 0);
+                return groupByColor;
+              })
+              // Generate search prompt
+              .then((data) => {
+                const shuffleArray = (array) => {
+                  for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    const temp = array[i];
+                    array[i] = array[j];
+                    array[j] = temp;
+                  }
+                };
+                // Shuffle colors in case n > 30 (using Fisher-Yates randomization)
+                shuffleArray(data);
+                const colorClause = data
+                  .map((obj) => obj.color.name)
+                  .slice(0, 30)
+                  .join(", ");
+                return `An oil painting in the style of Jackson Pollock using the following colors: ${colorClause}`;
+              })
+              // Set variable
+              .then((data) => {
+                // setColorPrompt(data);
+                Cookies.set("colorPrompt", data);
+              });
+            // // Catch errors
+            // .catch((error) => {
+            //   console.log(error);
+            // });
+          });
+        };
+        // Use backoff retry in case of error
+        retryOperation(generateColorPrompt);
+      }
     }
   }, [session]);
 
-  console.log(colorPrompt);
-  console.log(loading);
+  // console.log(colorPrompt);
+  // console.log(loading);
+  console.log(Cookies.get("colorPrompt"));
 
   return (
     <>
@@ -383,7 +395,11 @@ export default function Home() {
           <Button
             color="inherit"
             sx={{ display: { xs: "none", sm: "block" } }}
-            onClick={() => signOut()}
+            onClick={() => {
+              Cookies.remove("colorPrompt");
+              Cookies.remove("generatedImageUrl");
+              signOut();
+            }}
           >
             Log Out
           </Button>
@@ -511,3 +527,13 @@ export default function Home() {
     </>
   );
 }
+
+// Home.getInitialProps = ({ req }) => {
+//   const cookies = parseCookies(req);
+
+//   return {
+//     initColorPrompt: cookies.colorPrompt,
+//   };
+// };
+
+export default Home;

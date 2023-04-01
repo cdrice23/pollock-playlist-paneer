@@ -15,8 +15,9 @@ import MenuIcon from "@mui/icons-material/Menu";
 import { signOut, useSession } from "next-auth/react";
 import axios from "axios";
 import useSpotify from "@/hooks/useSpotify";
+import { openai } from "@/lib/openai";
 import Link from "next/link";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import { useRouter } from "next/router";
 import {
   colorPromptState,
@@ -26,6 +27,7 @@ import {
 import Loader from "@/components/Loader";
 import ImageResult from "@/components/ImageResult";
 import styles from "../styles/Result.module.css";
+import Cookies from "js-cookie";
 
 export default function Result() {
   const spotifyApi = useSpotify();
@@ -45,14 +47,50 @@ export default function Result() {
     setAnchorEl(null);
   };
 
+  console.log(openai);
+
   useEffect(() => {
-    setTimeout(() => {
-      setLoading(false);
-    }, 10000);
+    let retries = 0;
+    const intervalId = setInterval(() => {
+      if (retries >= 10) {
+        clearInterval(intervalId);
+        console.log("Exceeded maximum retries, exiting");
+        return;
+      }
+      if (Cookies.get("colorPrompt")) {
+        clearInterval(intervalId);
+        console.log("Got color prompt. Waiting for image URL next");
+        if (Cookies.get("generatedImageUrl")) {
+          console.log("Using existing generated Image URL");
+          setLoading(false);
+        } else {
+          console.log("Trying to fetch the generatedImageURL");
+          // fetchImage();
+          const generateImage = async () => {
+            const result = await openai.createImage({
+              prompt: Cookies.get("colorPrompt"),
+              n: 1,
+              size: "512x512",
+            });
+            Cookies.set("generatedImageUrl", result.data.data[0].url);
+          };
+          generateImage();
+          setLoading(false);
+        }
+      } else {
+        retries++;
+        console.log("Color prompt not populated, retrying...");
+      }
+    }, 1000);
+    // setTimeout(() => {
+    //   setLoading(false);
+    // }, 10000);
   }, []);
 
-  console.log(colorPrompt);
+  // console.log(colorPrompt);
   console.log(loading);
+  console.log(session);
+  console.log(Cookies.get("generatedImageUrl"));
 
   return (
     <>
@@ -96,7 +134,15 @@ export default function Result() {
                 Buy Me a Coffee!
               </Link>
             </MenuItem>
-            <MenuItem onClick={() => signOut()}>Log Out</MenuItem>
+            <MenuItem
+              onClick={() => {
+                Cookies.remove("colorPrompt");
+                Cookies.remove("generatedImageUrl");
+                signOut();
+              }}
+            >
+              Log Out
+            </MenuItem>
           </Menu>
         </Toolbar>
       </AppBar>

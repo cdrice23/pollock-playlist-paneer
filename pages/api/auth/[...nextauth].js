@@ -35,7 +35,7 @@ export const authOptions = {
       clientSecret: process.env.NEXT_PUBLIC_CLIENT_SECRET,
       authorization: LOGIN_URL,
     }),
-    // ...add more providers here
+    // ...add more providers here if needed
   ],
   secret: process.env.JWT_SECRET,
   pages: {
@@ -69,7 +69,7 @@ export const authOptions = {
       session.user.refreshToken = token.refreshToken;
       session.user.username = token.username;
 
-      return session;
+      return Promise.resolve(session);
     },
   },
 };
