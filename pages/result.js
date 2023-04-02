@@ -19,11 +19,7 @@ import { openai } from "@/lib/openai";
 import Link from "next/link";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { useRouter } from "next/router";
-import {
-  colorPromptState,
-  generatedImageState,
-  loadingState,
-} from "@/components/atoms";
+import { loadingState } from "@/components/atoms";
 import Loader from "@/components/Loader";
 import ImageResult from "@/components/ImageResult";
 import styles from "../styles/Result.module.css";
@@ -32,9 +28,9 @@ import Cookies from "js-cookie";
 export default function Result() {
   const spotifyApi = useSpotify();
   const { data: session, status } = useSession();
-  const [colorPrompt, setColorPrompt] = useRecoilState(colorPromptState);
-  const [generatedImage, setGeneratedImage] =
-    useRecoilState(generatedImageState);
+  // const [colorPrompt, setColorPrompt] = useRecoilState(colorPromptState);
+  // const [generatedImage, setGeneratedImage] =
+  //   useRecoilState(generatedImageState);
   const [loading, setLoading] = useRecoilState(loadingState);
   const [anchorEl, setAnchorEl] = React.useState(null);
   const router = useRouter();
@@ -47,7 +43,7 @@ export default function Result() {
     setAnchorEl(null);
   };
 
-  console.log(openai);
+  // console.log(openai);
 
   useEffect(() => {
     let retries = 0;
@@ -65,14 +61,19 @@ export default function Result() {
           setLoading(false);
         } else {
           console.log("Trying to fetch the generatedImageURL");
-          // fetchImage();
           const generateImage = async () => {
-            const result = await openai.createImage({
-              prompt: Cookies.get("colorPrompt"),
-              n: 1,
-              size: "512x512",
+            const prompt = Cookies.get("colorPrompt");
+            const response = await fetch("/api/image", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ prompt }),
             });
-            Cookies.set("generatedImageUrl", result.data.data[0].url);
+            const imageResponse = await response.json();
+            console.log(imageResponse);
+
+            Cookies.set("generatedImageUrl", imageResponse.imageUrl);
           };
           generateImage();
           setLoading(false);

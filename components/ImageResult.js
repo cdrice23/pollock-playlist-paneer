@@ -1,6 +1,7 @@
 import { Box, Typography } from "@mui/material";
 import Image from "next/image";
 import styles from "../styles/ImageResult.module.css";
+import Cookies from "js-cookie";
 
 export default function ImageResult({ session }) {
   return (
