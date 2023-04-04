@@ -52,12 +52,12 @@ export default function Result() {
     const intervalId = setInterval(() => {
       if (retries >= 10) {
         clearInterval(intervalId);
-        // console.log("Exceeded maximum retries, exiting");
+        console.log("Exceeded maximum retries, exiting");
         return;
       }
       if (Cookies.get("colorPrompt")) {
         clearInterval(intervalId);
-        // console.log("Got color prompt. Waiting for image URL next");
+        console.log("Got color prompt. Waiting for image URL next");
         if (Cookies.get("generatedImageUrl")) {
           // console.log("Using existing generated Image URL");
           setLoading(false);
@@ -84,7 +84,7 @@ export default function Result() {
         }
       } else {
         retries++;
-        // console.log("Color prompt not populated, retrying...");
+        console.log("Color prompt not populated, retrying...");
       }
     }, 1000);
   }, []);
@@ -102,6 +102,8 @@ export default function Result() {
       Cookies.remove("expirationTime");
     }
   }, [expirationTime]);
+
+  console.log(Cookies.get("colorPrompt"));
 
   return (
     <>
@@ -150,6 +152,7 @@ export default function Result() {
                 Cookies.remove("colorPrompt");
                 Cookies.remove("generatedImageUrl");
                 Cookies.remove("expirationTime");
+                setImageUrl(null);
                 signOut();
               }}
             >
