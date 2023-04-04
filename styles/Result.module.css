@@ -3,6 +3,12 @@
     color: inherit;
 }
 
+.body {
+  margin: 0 auto 16px;
+  padding: 4px 16px;
+  text-align: center;
+}
+
 .loading {
     overflow: hidden;
     display: inline-block;

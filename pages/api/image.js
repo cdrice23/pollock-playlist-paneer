@@ -18,6 +18,8 @@ export default async function handler(req, res) {
   });
 
   if (!response.data) throw new Error("Unable to generate image");
-  console.log(response.data.data[0]);
-  res.status(200).json({ imageUrl: response.data.data[0].url });
+  res.status(200).json({
+    imageUrl: response.data.data[0].url,
+    expirationDate: new Date(Date.now() + 2 * 60 * 60 * 1000),
+  });
 }

@@ -33,10 +33,6 @@ function Home() {
   // state and non-functional variables
   const spotifyApi = useSpotify();
   const { data: session, status } = useSession();
-  // const [colorPrompt, setColorPrompt] = useRecoilState(colorPromptState);
-  // const [colorPrompt, setColorPrompt] = useState(() =>
-  //   JSON.parse(initColorPrompt)
-  // );
   const [colorPrompt, setColorPrompt] = useState("");
   const [loading, setLoading] = useRecoilState(loadingState);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -56,24 +52,7 @@ function Home() {
   };
 
   // helpers
-  // Get track recommendations from an artist (functional)
-  // const getArtistRecommendedTracks = (artist) =>
-  //   spotifyApi
-  //     .getRecommendations({
-  //       seed_artists: artist,
-  //       limit: 100,
-  //     })
-  //     .then(
-  //       function (data) {
-  //         let recommendations = data.body;
-  //         // console.log(recommendations);
-  //         return recommendations.tracks.map((track) => track.id);
-  //       },
-  //       function (err) {
-  //         console.log(err);
-  //       }
-  //     );
-
+  // get Recommended Track list
   const getArtistRecommendedTracks = (artist) =>
     spotifyApi
       .getRecommendations({
@@ -212,18 +191,17 @@ function Home() {
     while (attempts < maxAttempts) {
       try {
         let result = await fn();
-        console.log("Success!");
+        // console.log("Success!");
         return result;
       } catch (error) {
         attempts++;
-        console.log(`Attempt ${attempts} failed: ${error}`);
-        console.log(errorModalOpen);
+        // console.log(`Attempt ${attempts} failed: ${error}`);
         await new Promise((resolve) =>
           setTimeout(resolve, delayInSeconds * 1000)
         );
       }
     }
-    console.log(`Maximum number of attempts (${maxAttempts}) reached.`);
+    // console.log(`Maximum number of attempts (${maxAttempts}) reached.`);
   };
 
   // Spotify-specific retry
@@ -253,23 +231,11 @@ function Home() {
     }
   };
 
-  // Delay (functional) - unused
-  // const delay = (fn, ms) =>
-  //   new Promise((resolve) => setTimeout(() => resolve(fn()), ms));
-
-  // countdown v2 (functional)
-  // const countdown = (countTo) => {
-  //   for (let i = countTo; i > 0; i--) {
-  //     setTimeout(() => {
-  //       console.log(i);
-  //     }, (countTo - i) * 1000);
-  //   }
-  // };
-
   useEffect(() => {
     // Check if cached colorPrompt exists
     if (Cookies.get("colorPrompt")) {
-      console.log("colorPrompt already generated.");
+      // console.log("colorPrompt already generated.");
+      return;
     } else {
       // Ensure access token is available from custom Spotify hook
       if (spotifyApi.getAccessToken()) {
@@ -355,24 +321,16 @@ function Home() {
               })
               // Set variable
               .then((data) => {
-                // setColorPrompt(data);
+                setColorPrompt(data);
                 Cookies.set("colorPrompt", data);
               });
-            // // Catch errors
-            // .catch((error) => {
-            //   console.log(error);
-            // });
           });
         };
         // Use backoff retry in case of error
         retryOperation(generateColorPrompt);
       }
     }
-  }, [session]);
-
-  // console.log(colorPrompt);
-  // console.log(loading);
-  console.log(Cookies.get("colorPrompt"));
+  }, [session, colorPrompt]);
 
   return (
     <>
@@ -398,6 +356,7 @@ function Home() {
             onClick={() => {
               Cookies.remove("colorPrompt");
               Cookies.remove("generatedImageUrl");
+              Cookies.remove("expirationTime");
               signOut();
             }}
           >
@@ -527,13 +486,5 @@ function Home() {
     </>
   );
 }
-
-// Home.getInitialProps = ({ req }) => {
-//   const cookies = parseCookies(req);
-
-//   return {
-//     initColorPrompt: cookies.colorPrompt,
-//   };
-// };
 
 export default Home;

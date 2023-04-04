@@ -26,16 +26,19 @@ import styles from "../styles/Result.module.css";
 import Cookies from "js-cookie";
 
 export default function Result() {
+  // state
   const spotifyApi = useSpotify();
   const { data: session, status } = useSession();
-  // const [colorPrompt, setColorPrompt] = useRecoilState(colorPromptState);
-  // const [generatedImage, setGeneratedImage] =
-  //   useRecoilState(generatedImageState);
   const [loading, setLoading] = useRecoilState(loadingState);
   const [anchorEl, setAnchorEl] = React.useState(null);
   const router = useRouter();
-
   const open = Boolean(anchorEl);
+  const [imageUrl, setImageUrl] = useState(null);
+  const [expirationTime, setExpirationTime] = useState(
+    Cookies.get("expirationTime")
+  );
+
+  // handlers
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -43,24 +46,23 @@ export default function Result() {
     setAnchorEl(null);
   };
 
-  // console.log(openai);
-
+  // UseEffect on initial load to check for cookies
   useEffect(() => {
     let retries = 0;
     const intervalId = setInterval(() => {
       if (retries >= 10) {
         clearInterval(intervalId);
-        console.log("Exceeded maximum retries, exiting");
+        // console.log("Exceeded maximum retries, exiting");
         return;
       }
       if (Cookies.get("colorPrompt")) {
         clearInterval(intervalId);
-        console.log("Got color prompt. Waiting for image URL next");
+        // console.log("Got color prompt. Waiting for image URL next");
         if (Cookies.get("generatedImageUrl")) {
-          console.log("Using existing generated Image URL");
+          // console.log("Using existing generated Image URL");
           setLoading(false);
         } else {
-          console.log("Trying to fetch the generatedImageURL");
+          // console.log("Trying to fetch the generatedImageURL");
           const generateImage = async () => {
             const prompt = Cookies.get("colorPrompt");
             const response = await fetch("/api/image", {
@@ -71,27 +73,35 @@ export default function Result() {
               body: JSON.stringify({ prompt }),
             });
             const imageResponse = await response.json();
-            console.log(imageResponse);
-
-            Cookies.set("generatedImageUrl", imageResponse.imageUrl);
+            const url = await imageResponse.imageUrl;
+            const expiration = await imageResponse.expirationDate;
+            Cookies.set("expirationTime", expiration);
+            Cookies.set("generatedImageUrl", url);
+            setImageUrl(url);
           };
           generateImage();
           setLoading(false);
         }
       } else {
         retries++;
-        console.log("Color prompt not populated, retrying...");
+        // console.log("Color prompt not populated, retrying...");
       }
     }, 1000);
-    // setTimeout(() => {
-    //   setLoading(false);
-    // }, 10000);
   }, []);
 
-  // console.log(colorPrompt);
-  console.log(loading);
-  console.log(session);
-  console.log(Cookies.get("generatedImageUrl"));
+  useEffect(() => {
+    setImageUrl(Cookies.get("generatedImageUrl"));
+  }, []);
+
+  // UseEffect for checking expiration
+  useEffect(() => {
+    if (expirationTime && expirationTime < Date.now()) {
+      setImageUrl(null);
+      setExpirationTime(null);
+      Cookies.remove("generatedImageUrl");
+      Cookies.remove("expirationTime");
+    }
+  }, [expirationTime]);
 
   return (
     <>
@@ -139,6 +149,7 @@ export default function Result() {
               onClick={() => {
                 Cookies.remove("colorPrompt");
                 Cookies.remove("generatedImageUrl");
+                Cookies.remove("expirationTime");
                 signOut();
               }}
             >
@@ -148,20 +159,36 @@ export default function Result() {
         </Toolbar>
       </AppBar>
       <Toolbar />
-      {loading ? (
-        <>
-          <Loader />
-          <Box display={"flex"} justifyContent="center">
-            <Typography variant="h3" display={"inline-block"}>
-              Painting
-            </Typography>
-            <Typography variant="h3" className={styles.loading}>
-              ...
+      {!imageUrl ? (
+        expirationTime < Date.now() ? (
+          <Box mt="25%">
+            <Typography className={styles.body}>
+              Generated image has expired. Please log-out and log back in to
+              generate a new one!
             </Typography>
           </Box>
-        </>
+        ) : (
+          <>
+            <Loader />
+            <Box display={"flex"} justifyContent="center">
+              <Typography variant="h3" display={"inline-block"}>
+                Painting
+              </Typography>
+              <Typography variant="h3" className={styles.loading}>
+                ...
+              </Typography>
+            </Box>
+          </>
+        )
       ) : (
-        <ImageResult session={session} />
+        <>
+          <ImageResult session={session} imageLoc={imageUrl} />
+          <Typography
+            className={styles.body}
+          >{`Note: Images generated by DALL-E will expire after 2 hours (${new Date(
+            Cookies.get("expirationTime")
+          ).toLocaleTimeString()})`}</Typography>
+        </>
       )}
     </>
   );

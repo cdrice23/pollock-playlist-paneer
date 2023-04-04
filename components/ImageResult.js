@@ -3,7 +3,7 @@ import Image from "next/image";
 import styles from "../styles/ImageResult.module.css";
 import Cookies from "js-cookie";
 
-export default function ImageResult({ session }) {
+export default function ImageResult({ session }, props) {
   return (
     <Box textAlign={"center"}>
       <Typography variant="h4" className={styles.title}>
@@ -21,7 +21,8 @@ export default function ImageResult({ session }) {
         className={styles.imageBox}
       >
         <Image
-          src="/sample.webp"
+          key="generatedImageUrl"
+          src={Cookies.get("generatedImageUrl")}
           alt="Sample"
           fill
           sizes="(max-width: 768px) 100vw,
