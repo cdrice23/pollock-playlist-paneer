@@ -112,30 +112,30 @@ export default function FontSwatch(props) {
               <strong>{obj.name}</strong>
             </Typography>
             <Typography sx={obj} p={2} className={obj.fontFamily}>
-              That's exactly what{" "}
+              {`That's exactly what `}
               <strong>
                 <em>Pollock Playlist Paneer</em>
-              </strong>{" "}
-              was built for. Using OpenAI's DALL-E learning model, you can
+              </strong>
+              {` was built for. Using OpenAI's DALL-E learning model, you can
               generate a unique, AI-generated oil painting in the style of
-              Jackson Pollock that uses YOUR Spotify data.
+              Jackson Pollock that uses YOUR Spotify data.`}
             </Typography>
             <Typography sx={obj} p={2} className={obj.fontFamily}>
-              The algorithm takes data on your top artists and translates it
+              {`The algorithm takes data on your top artists and translates it
               into characteristics of your listening style - do you listen to
               high-energy, angry music? Or do you like more chill classical
-              music?
+              music?`}
             </Typography>
             <Typography sx={obj} p={2} className={obj.fontFamily}>
-              From there, these characteristics are translated into
+              {`From there, these characteristics are translated into
               representative colors from a spectrum describing mood -
               low-energy, sad songs might plot to a color like Midnigtht Blue;
               whereas a happier, high-energy song might plot to a color like
-              Lemon Chiffon.
+              Lemon Chiffon.`}
             </Typography>
             <Typography sx={obj} p={2} className={obj.fontFamily}>
-              Finally, a prompt is given to DALL-E to generate a completely
-              unique piece of art that represents YOU.
+              {`Finally, a prompt is given to DALL-E to generate a completely
+              unique piece of art that represents YOU.`}
             </Typography>
           </Grid>
         ))}

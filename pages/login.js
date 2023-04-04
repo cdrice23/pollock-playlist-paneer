@@ -39,7 +39,7 @@ export default function Login(props) {
           />
         </Box>
         <Typography variant="h5" fontStyle={"italic"} className={styles.title}>
-          "canvas inspired by soundwaves."
+          {`"canvas inspired by soundwaves."`}
         </Typography>
         <Box className={styles.buttonContainer}>
           {Object.values(props.providers).map((provider) => (
