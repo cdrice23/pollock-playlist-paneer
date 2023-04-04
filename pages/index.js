@@ -386,17 +386,18 @@ function Home() {
       <Toolbar />
       <Box>
         <Typography variant="h3" className={styles.header}>
-          What does your music taste{" "}
+          {`What does your music taste `}
           <span className={styles.pop}>look like</span> ?
         </Typography>
         <Typography className={styles.body}>
-          That's exactly what{" "}
-          <strong className={styles.embiggen}>Pollock Paneer</strong> was built
-          for.{" "}
+          {`That's exactly what `}
+          <strong className={styles.embiggen}>Pollock Paneer</strong>
+          {` was built
+          for. `}
         </Typography>
         <Typography className={styles.body}>
-          Using OpenAI's DALL-E learning model, you can create a unique,
-          AI-generated oil painting in the style of Jackson Pollock that uses{" "}
+          {`Using OpenAI's DALL-E learning model, you can create a unique,
+          AI-generated oil painting in the style of Jackson Pollock that uses `}
           <span className={styles.popBody}>YOUR</span> Spotify data.
         </Typography>
         <Accordion
@@ -453,22 +454,23 @@ function Home() {
             className={styles.accordionSummary}
           >
             <Typography variant="h4" className={styles.accordionSummaryText}>
-              What's with the name?
+              {`What's with the name?`}
             </Typography>
           </AccordionSummary>
           <AccordionDetails>
             <Typography className={styles.body}>
               (For those of you who do not know){" "}
-              <span className={styles.popBody}>"palak paneer"</span> is a
+              <span className={styles.popBody}>{`"palak paneer"`}</span> is a
               traditional North Indian vegetarian dish consisting of pureed
-              spinach (<em>"palak"</em> in Hindi) and cheese (<em>"paneer"</em>
-              ). If you haven't tried it before, go order some from your local
-              Indian restaurant ASAP!
+              spinach (<em>{`"palak"`}</em> in Hindi) and cheese (
+              <em>{`"paneer"`}</em>)
+              {`. If you haven't tried it before, go order some from your local
+              Indian restaurant ASAP!`}
             </Typography>
             <Typography className={styles.body}>
-              To be totally honest, the name "Pollock Paneer" was the result of
+              {`To be totally honest, the name "Pollock Paneer" was the result of
               intrusive shower thoughts, coupled with a propensity for making
-              really bad dad jokes...
+              really bad dad jokes...`}
             </Typography>
             <Typography className={styles.groans}>*hold for groans*</Typography>
           </AccordionDetails>
