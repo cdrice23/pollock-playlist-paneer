@@ -129,11 +129,13 @@ export default function Result() {
             color="inherit"
             sx={{ display: { xs: "none", sm: "block" } }}
             onClick={() => {
-              Cookies.remove("colorPrompt");
-              Cookies.remove("generatedImageUrl");
-              Cookies.remove("expirationTime");
-              setImageUrl(null);
-              signOut();
+              signOut().then(() => {
+                Cookies.remove("colorPrompt");
+                Cookies.remove("generatedImageUrl");
+                Cookies.remove("expirationTime");
+              });
+              // signOut();
+              // setImageUrl(null);
             }}
           >
             Log Out
@@ -157,11 +159,11 @@ export default function Result() {
             </MenuItem>
             <MenuItem
               onClick={() => {
-                Cookies.remove("colorPrompt");
-                Cookies.remove("generatedImageUrl");
-                Cookies.remove("expirationTime");
-                setImageUrl(null);
-                signOut();
+                signOut().then(() => {
+                  Cookies.remove("colorPrompt");
+                  Cookies.remove("generatedImageUrl");
+                  Cookies.remove("expirationTime");
+                });
               }}
             >
               Log Out
