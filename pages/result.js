@@ -38,6 +38,8 @@ export default function Result() {
     Cookies.get("expirationTime")
   );
 
+  console.log(Cookies.get());
+
   // handlers
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);

@@ -2,6 +2,7 @@ import { Box, Button, Typography, Grid } from "@mui/material";
 import { getProviders, signIn } from "next-auth/react";
 import Image from "next/image";
 import styles from "../styles/Login.module.css";
+import Cookies from "js-cookie";
 
 export async function getServerSideProps() {
   const providers = await getProviders();
@@ -46,7 +47,12 @@ export default function Login(props) {
             <Button
               variant="contained"
               key={provider.name}
-              onClick={() => signIn(provider.id, { callbackUrl: "/" })}
+              onClick={() => {
+                Cookies.remove("colorPrompt");
+                Cookies.remove("generatedImageUrl");
+                Cookies.remove("expirationTime");
+                signIn(provider.id, { callbackUrl: "/" });
+              }}
             >
               Login with {provider.name}
             </Button>

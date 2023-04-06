@@ -39,6 +39,8 @@ function Home() {
   const router = useRouter();
   const menuOpen = Boolean(anchorEl);
 
+  console.log(Cookies.get());
+
   // handlers
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -354,9 +356,9 @@ function Home() {
             color="inherit"
             sx={{ display: { xs: "none", sm: "block" } }}
             onClick={() => {
-              Cookies.remove("colorPrompt");
-              Cookies.remove("generatedImageUrl");
-              Cookies.remove("expirationTime");
+              // Cookies.remove("colorPrompt");
+              // Cookies.remove("generatedImageUrl");
+              // Cookies.remove("expirationTime");
               signOut();
             }}
           >
