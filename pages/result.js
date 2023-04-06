@@ -59,10 +59,10 @@ export default function Result() {
         clearInterval(intervalId);
         console.log("Got color prompt. Waiting for image URL next");
         if (Cookies.get("generatedImageUrl")) {
-          // console.log("Using existing generated Image URL");
+          console.log("Using existing generated Image URL");
           setLoading(false);
         } else {
-          // console.log("Trying to fetch the generatedImageURL");
+          console.log("Trying to fetch the generatedImageURL");
           const generateImage = async () => {
             const prompt = Cookies.get("colorPrompt");
             const response = await fetch("/api/image", {

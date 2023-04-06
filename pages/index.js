@@ -191,17 +191,17 @@ function Home() {
     while (attempts < maxAttempts) {
       try {
         let result = await fn();
-        // console.log("Success!");
+        console.log("Success!");
         return result;
       } catch (error) {
         attempts++;
-        // console.log(`Attempt ${attempts} failed: ${error}`);
+        console.log(`Attempt ${attempts} failed: ${error}`);
         await new Promise((resolve) =>
           setTimeout(resolve, delayInSeconds * 1000)
         );
       }
     }
-    // console.log(`Maximum number of attempts (${maxAttempts}) reached.`);
+    console.log(`Maximum number of attempts (${maxAttempts}) reached.`);
   };
 
   // Spotify-specific retry
@@ -234,7 +234,7 @@ function Home() {
   useEffect(() => {
     // Check if cached colorPrompt exists
     if (Cookies.get("colorPrompt")) {
-      // console.log("colorPrompt already generated.");
+      console.log("colorPrompt already generated.");
       return;
     } else {
       // Ensure access token is available from custom Spotify hook
