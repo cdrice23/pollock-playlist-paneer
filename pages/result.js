@@ -128,7 +128,13 @@ export default function Result() {
           <Button
             color="inherit"
             sx={{ display: { xs: "none", sm: "block" } }}
-            onClick={() => signOut()}
+            onClick={() => {
+              Cookies.remove("colorPrompt");
+              Cookies.remove("generatedImageUrl");
+              Cookies.remove("expirationTime");
+              setImageUrl(null);
+              signOut();
+            }}
           >
             Log Out
           </Button>

@@ -356,9 +356,10 @@ function Home() {
             color="inherit"
             sx={{ display: { xs: "none", sm: "block" } }}
             onClick={() => {
-              // Cookies.remove("colorPrompt");
-              // Cookies.remove("generatedImageUrl");
-              // Cookies.remove("expirationTime");
+              Cookies.remove("colorPrompt");
+              Cookies.remove("generatedImageUrl");
+              Cookies.remove("expirationTime");
+              setImageUrl(null);
               signOut();
             }}
           >
@@ -381,7 +382,17 @@ function Home() {
                 Buy Me a Coffee!
               </Link>
             </MenuItem>
-            <MenuItem onClick={() => signOut()}>Log Out</MenuItem>
+            <MenuItem
+              onClick={() => {
+                Cookies.remove("colorPrompt");
+                Cookies.remove("generatedImageUrl");
+                Cookies.remove("expirationTime");
+                setImageUrl(null);
+                signOut();
+              }}
+            >
+              Log Out
+            </MenuItem>
           </Menu>
         </Toolbar>
       </AppBar>
