@@ -359,7 +359,6 @@ function Home() {
               Cookies.remove("colorPrompt");
               Cookies.remove("generatedImageUrl");
               Cookies.remove("expirationTime");
-              setImageUrl(null);
               signOut();
             }}
           >
@@ -387,7 +386,6 @@ function Home() {
                 Cookies.remove("colorPrompt");
                 Cookies.remove("generatedImageUrl");
                 Cookies.remove("expirationTime");
-                setImageUrl(null);
                 signOut();
               }}
             >
