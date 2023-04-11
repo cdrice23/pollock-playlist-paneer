@@ -8,8 +8,8 @@ export default function ImageResult({ session }, props) {
     <Box textAlign={"center"}>
       <Typography variant="h4" className={styles.title}>
         {session
-          ? `Presenting... ${session.user.name}'s very own Jackson Pollock.`
-          : `Presenting... your very own Jackson Pollock.`}
+          ? `Presenting... ${session.user.name}'s very own "Jackson Pollock."`
+          : `Presenting... your very own "Jackson Pollock."`}
       </Typography>
       <Box
         position={"relative"}

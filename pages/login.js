@@ -17,8 +17,15 @@ export async function getServerSideProps() {
 export default function Login(props) {
   return (
     <>
-      <Box>
-        <Typography variant="h2" className={styles.title}>
+      <Box
+        display={"flex"}
+        flexDirection={"column"}
+        justifyContent={"center"}
+        alignItems={"center"}
+        height="100vh"
+        marginTop={-2}
+      >
+        <Typography variant="h3" className={styles.title}>
           Pollock Paneer
         </Typography>
         <Box
@@ -57,6 +64,20 @@ export default function Login(props) {
               Login with {provider.name}
             </Button>
           ))}
+        </Box>
+        <Box
+          display="flex"
+          justifyContent={"center"}
+          alignItems={"center"}
+          marginTop={4}
+        >
+          <Typography marginRight={2}>Powered by</Typography>
+          <Image
+            src="/Spotify_Logo.png"
+            width={104}
+            height={35}
+            alt="Spotify logo"
+          />
         </Box>
       </Box>
     </>
