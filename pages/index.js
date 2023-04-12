@@ -12,9 +12,11 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
+  Paper,
+  Modal,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { Help, ExpandMore } from "@mui/icons-material";
 import { signOut, useSession } from "next-auth/react";
 import axios from "axios";
 import useSpotify from "@/hooks/useSpotify";
@@ -28,6 +30,7 @@ import {
 } from "@/components/atoms";
 import styles from "../styles/Home.module.css";
 import Cookies from "js-cookie";
+import Image from "next/image";
 
 function Home() {
   // state and non-functional variables
@@ -36,10 +39,9 @@ function Home() {
   const [colorPrompt, setColorPrompt] = useState("");
   const [loading, setLoading] = useRecoilState(loadingState);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [helpOpen, setHelpOpen] = useState(false);
   const router = useRouter();
   const menuOpen = Boolean(anchorEl);
-
-  console.log(Cookies.get());
 
   // handlers
   const handleMenuOpen = (event) => {
@@ -51,6 +53,12 @@ function Home() {
   const handleGenerate = () => {
     setLoading(true);
     router.push("/result");
+  };
+  const handleHelpOpen = () => {
+    setHelpOpen(true);
+  };
+  const handleHelpClose = () => {
+    setHelpOpen(false);
   };
 
   // helpers
@@ -67,7 +75,7 @@ function Home() {
           return recommendations.tracks.map((track) => track.id);
         },
         function (err) {
-          console.log(err);
+          // console.log(err);
         }
       );
 
@@ -79,7 +87,7 @@ function Home() {
         return data.body;
       },
       function (err) {
-        console.log(err);
+        // console.log(err);
       }
     );
 
@@ -193,17 +201,17 @@ function Home() {
     while (attempts < maxAttempts) {
       try {
         let result = await fn();
-        console.log("Success!");
+        // console.log("Success!");
         return result;
       } catch (error) {
         attempts++;
-        console.log(`Attempt ${attempts} failed: ${error}`);
+        // console.log(`Attempt ${attempts} failed: ${error}`);
         await new Promise((resolve) =>
           setTimeout(resolve, delayInSeconds * 1000)
         );
       }
     }
-    console.log(`Maximum number of attempts (${maxAttempts}) reached.`);
+    // console.log(`Maximum number of attempts (${maxAttempts}) reached.`);
   };
 
   // Spotify-specific retry
@@ -216,18 +224,18 @@ function Home() {
       return await fn();
     } catch (err) {
       if (currentRetries <= maxRetries) {
-        console.log("Retry number: " + currentRetries);
+        // console.log("Retry number: " + currentRetries);
         if (err && err.statusCode === 429) {
           const retryAfter =
             (parseInt(e.headers["retry-after"], 10) + 1) * 1000;
-          console.log(
-            "Retrying after " + retryAfter.toString() / 1000 + " seconds."
-          );
+          // console.log(
+          //   "Retrying after " + retryAfter.toString() / 1000 + " seconds."
+          // );
           await new Promise((resolve) => setTimeout(resolve, retryAfter));
         }
         return await callSpotifyWithRetry(fn, currentRetries + 1);
       } else {
-        console.log("Caught here.");
+        // console.log("Caught here.");
         throw err;
       }
     }
@@ -236,7 +244,7 @@ function Home() {
   useEffect(() => {
     // Check if cached colorPrompt exists
     if (Cookies.get("colorPrompt")) {
-      console.log("colorPrompt already generated.");
+      // console.log("colorPrompt already generated.");
       return;
     } else {
       // Ensure access token is available from custom Spotify hook
@@ -364,6 +372,7 @@ function Home() {
           >
             Log Out
           </Button>
+          {/* Mobile menu */}
           <IconButton
             onClick={handleMenuOpen}
             color="inherit"
@@ -392,6 +401,80 @@ function Home() {
               Log Out
             </MenuItem>
           </Menu>
+          <IconButton onClick={handleHelpOpen} color="inherit">
+            <Help />
+          </IconButton>
+          <Modal open={helpOpen} onClose={handleHelpClose}>
+            <Paper className={styles.helpModal}>
+              <Typography
+                variant="h5"
+                textAlign={"center"}
+                className={styles.helpTitle}
+              >
+                Need Help Removing Spotify Access from Pollock Paneer?
+              </Typography>
+              <Typography
+                textAlign={"center"}
+                fontSize={"0.9em"}
+              >{`It's super easy! Just follow these steps:`}</Typography>
+              <Typography maxWidth={"100%"} fontSize={"0.9em"}>
+                <ol>
+                  <li>
+                    Go to{" "}
+                    <Link
+                      href="https://www.spotify.com/account/apps/"
+                      target="_blank"
+                      className={styles.modalLink}
+                    >
+                      this link
+                    </Link>
+                  </li>
+                  <li>{`Under "Manage apps", find "pollock-paneer" and click the "remove access" button`}</li>
+                </ol>
+              </Typography>
+              {/* Mobile images */}
+              <Box
+                sx={{
+                  display: { xs: "flex", sm: "none" },
+                  justifyContent: "center",
+                  alignItems: "center",
+                  flexDirection: "column",
+                }}
+              >
+                <Image
+                  src="/remove_1.png"
+                  alt="A screenshot of the pollock-paneer item in manage apps screen of Spotify"
+                  height={95}
+                  width={214}
+                  className={styles.screenshot}
+                />
+                <Image
+                  src="/remove_2.png"
+                  alt="A screenshot of the remove app button in manage apps screen of Spotify"
+                  height={95}
+                  width={214}
+                  className={styles.screenshot}
+                />
+              </Box>
+              {/* Desktop images */}
+              <Box
+                sx={{
+                  display: { xs: "none", sm: "flex" },
+                  justifyContent: "center",
+                  alignItems: "center",
+                  flexDirection: "column",
+                }}
+              >
+                <Image
+                  src="/remove_access.png"
+                  alt="A screenshot manage apps screen of Spotify"
+                  height={61}
+                  width={532}
+                  className={styles.screenshot}
+                />
+              </Box>
+            </Paper>
+          </Modal>
         </Toolbar>
       </AppBar>
       <Toolbar />
@@ -421,7 +504,7 @@ function Home() {
           }}
         >
           <AccordionSummary
-            expandIcon={<ExpandMoreIcon className={styles.carrot} />}
+            expandIcon={<ExpandMore className={styles.carrot} />}
             className={styles.accordionSummary}
           >
             <Typography variant="h4" className={styles.accordionSummaryText}>
@@ -461,7 +544,7 @@ function Home() {
           }}
         >
           <AccordionSummary
-            expandIcon={<ExpandMoreIcon className={styles.carrot} />}
+            expandIcon={<ExpandMore className={styles.carrot} />}
             className={styles.accordionSummary}
           >
             <Typography variant="h4" className={styles.accordionSummaryText}>

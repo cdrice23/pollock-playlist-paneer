@@ -37,6 +37,17 @@
     color: inherit;
 }
 
+.modalLink {
+    text-decoration: none;
+    color:#4f83cc;
+    font-weight: bold;
+}
+
+.modalLink:hover {
+    color: white;
+    background-color: #cc0000;
+}
+
 .generate {
     margin: 16px auto 20%
 }
@@ -92,4 +103,26 @@
     padding: 16px;
     text-align: center;
     background-color: #fff5e6;
+}
+
+.helpModal {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-width: 300px;
+    padding: 16px
+}
+
+.helpTitle {
+    margin-bottom: 8px;
+}
+
+.screenshot{
+    border: 2px #4f83cc solid;
+    margin: 8px;
 }

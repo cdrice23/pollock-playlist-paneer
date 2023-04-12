@@ -39,8 +39,6 @@ export default function Result() {
     Cookies.get("expirationTime")
   );
 
-  console.log(Cookies.get());
-
   // handlers
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -55,17 +53,17 @@ export default function Result() {
     const intervalId = setInterval(() => {
       if (retries >= 10) {
         clearInterval(intervalId);
-        console.log("Exceeded maximum retries, exiting");
+        // console.log("Exceeded maximum retries, exiting");
         return;
       }
       if (Cookies.get("colorPrompt")) {
         clearInterval(intervalId);
-        console.log("Got color prompt. Waiting for image URL next");
+        // console.log("Got color prompt. Waiting for image URL next");
         if (Cookies.get("generatedImageUrl")) {
-          console.log("Using existing generated Image URL");
+          // console.log("Using existing generated Image URL");
           setLoading(false);
         } else {
-          console.log("Trying to fetch the generatedImageURL");
+          // console.log("Trying to fetch the generatedImageURL");
           const generateImage = async () => {
             const prompt = Cookies.get("colorPrompt");
             const response = await fetch("/api/image", {
@@ -87,7 +85,7 @@ export default function Result() {
         }
       } else {
         retries++;
-        console.log("Color prompt not populated, retrying...");
+        // console.log("Color prompt not populated, retrying...");
       }
     }, 1000);
   }, []);
@@ -105,8 +103,6 @@ export default function Result() {
       Cookies.remove("expirationTime");
     }
   }, [expirationTime]);
-
-  console.log(Cookies.get("colorPrompt"));
 
   return (
     <>
