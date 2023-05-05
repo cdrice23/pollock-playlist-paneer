@@ -8,8 +8,7 @@
     justify-content: flex-start;
     min-width: 325px;
     padding: 16px;
-    min-height: 350px;
-    max-height: 500px;
+    height: 400px;
     overflow: auto;
     margin: 0;
 }
