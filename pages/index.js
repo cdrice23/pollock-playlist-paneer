@@ -12,8 +12,6 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
-  Paper,
-  Modal,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import { Help, ExpandMore } from "@mui/icons-material";
@@ -24,9 +22,9 @@ import Link from "next/link";
 import { useRecoilState } from "recoil";
 import { useRouter } from "next/router";
 import {
-  colorPromptState,
   loadingState,
-  errorModalOpenState,
+  userColorsState,
+  userTopArtistsState,
 } from "@/components/atoms";
 import styles from "../styles/Home.module.css";
 import Cookies from "js-cookie";
@@ -258,6 +256,10 @@ function Home() {
         const generateColorPrompt = () => {
           spotifyApi.getMyTopArtists({ limit: 25 }).then(function (data) {
             let topArtistsRaw = data.body.items;
+            Cookies.set(
+              "userTopArtists",
+              topArtistsRaw.map((artist) => artist.name)
+            );
             // Generate full recommended track array from top artist list
             Promise.all(
               topArtistsRaw.map(
@@ -328,6 +330,10 @@ function Home() {
                 };
                 // Shuffle colors in case n > 30 (using Fisher-Yates randomization)
                 shuffleArray(data);
+                Cookies.set(
+                  "userColors",
+                  data.map((obj) => obj.color.name)
+                );
                 const colorClause = data
                   .map((obj) => obj.color.name)
                   .slice(0, 30)
@@ -372,6 +378,8 @@ function Home() {
               Cookies.remove("colorPrompt");
               Cookies.remove("generatedImageUrl");
               Cookies.remove("expirationTime");
+              Cookies.remove("userTopArtists");
+              Cookies.remove("userColors");
               signOut();
             }}
           >
@@ -400,6 +408,8 @@ function Home() {
                 Cookies.remove("colorPrompt");
                 Cookies.remove("generatedImageUrl");
                 Cookies.remove("expirationTime");
+                Cookies.remove("userTopArtists");
+                Cookies.remove("userColors");
                 signOut();
               }}
             >

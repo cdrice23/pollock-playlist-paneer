@@ -2,6 +2,7 @@ import { Box, Typography } from "@mui/material";
 import Image from "next/image";
 import styles from "../styles/ImageResult.module.css";
 import Cookies from "js-cookie";
+import Explanation from "./Explanation";
 
 export default function ImageResult({ session }, props) {
   return (
@@ -11,6 +12,7 @@ export default function ImageResult({ session }, props) {
           ? `Presenting... ${session.user.name}'s very own "Jackson Pollock."`
           : `Presenting... your very own "Jackson Pollock."`}
       </Typography>
+      <Explanation />
       <Box
         position={"relative"}
         width={"100vw"}

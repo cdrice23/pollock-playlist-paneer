@@ -20,7 +20,11 @@ import { openai } from "@/lib/openai";
 import Link from "next/link";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { useRouter } from "next/router";
-import { loadingState } from "@/components/atoms";
+import {
+  loadingState,
+  userColorsState,
+  userTopArtistsState,
+} from "@/components/atoms";
 import Loader from "@/components/Loader";
 import ImageResult from "@/components/ImageResult";
 import styles from "../styles/Result.module.css";
@@ -138,6 +142,8 @@ export default function Result() {
                 Cookies.remove("colorPrompt");
                 Cookies.remove("generatedImageUrl");
                 Cookies.remove("expirationTime");
+                Cookies.remove("userTopArtists");
+                Cookies.remove("userColors");
               });
             }}
           >
@@ -166,6 +172,8 @@ export default function Result() {
                   Cookies.remove("colorPrompt");
                   Cookies.remove("generatedImageUrl");
                   Cookies.remove("expirationTime");
+                  Cookies.remove("userTopArtists");
+                  Cookies.remove("userColors");
                 });
               }}
             >
