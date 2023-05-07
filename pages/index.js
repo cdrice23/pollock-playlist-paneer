@@ -293,7 +293,7 @@ function Home() {
                     .filter(
                       (obj) =>
                         obj.value ===
-                        Number((track.energy * track.valence).toFixed(4))
+                        Number((track.energy * track.valence).toFixed(2))
                     )
                     .map((color) => color.name)
                 );
@@ -332,11 +332,11 @@ function Home() {
                 shuffleArray(data);
                 Cookies.set(
                   "userColors",
-                  data.map((obj) => obj.color.name)
+                  data.map((obj) => obj.color.name).slice(0, 20)
                 );
                 const colorClause = data
                   .map((obj) => obj.color.name)
-                  .slice(0, 30)
+                  .slice(0, 20)
                   .join(", ");
                 return `An oil painting in the style of Jackson Pollock using the following colors: ${colorClause}`;
               })

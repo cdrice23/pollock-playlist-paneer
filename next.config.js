@@ -18,7 +18,6 @@ const nextConfig = {
 
 module.exports = nextConfig;
 
-
 // Inected Content via Sentry Wizard Below
 
 const { withSentryConfig } = require("@sentry/nextjs");
