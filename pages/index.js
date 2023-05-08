@@ -288,15 +288,17 @@ function Home() {
               })
               // Calculate color factor
               .then((data) => {
-                return data.map((track) =>
-                  colorArray
-                    .filter(
-                      (obj) =>
-                        obj.value ===
-                        Number((track.energy * track.valence).toFixed(2))
-                    )
-                    .map((color) => color.name)
-                );
+                return data.map((track) => {
+                  if (track && track.energy && track.valence) {
+                    return colorArray
+                      .filter(
+                        (obj) =>
+                          obj.value ===
+                          Number((track.energy * track.valence).toFixed(2))
+                      )
+                      .map((color) => color.name);
+                  }
+                });
               })
               // Flatten data in array
               .then((data) => {
@@ -328,7 +330,7 @@ function Home() {
                     array[j] = temp;
                   }
                 };
-                // Shuffle colors in case n > 30 (using Fisher-Yates randomization)
+                // Shuffle colors in case n > 20 (using Fisher-Yates randomization)
                 shuffleArray(data);
                 Cookies.set(
                   "userColors",

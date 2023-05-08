@@ -79,6 +79,7 @@ export default function Result() {
           const generateImage = async () => {
             const prompt = Cookies.get("colorPrompt");
             const response = await fetch("/api/image", {
+              // const response = await fetch("/api/edge", {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
