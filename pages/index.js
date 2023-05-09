@@ -19,13 +19,7 @@ import { signOut, useSession } from "next-auth/react";
 import axios from "axios";
 import useSpotify from "@/hooks/useSpotify";
 import Link from "next/link";
-import { useRecoilState } from "recoil";
 import { useRouter } from "next/router";
-import {
-  loadingState,
-  userColorsState,
-  userTopArtistsState,
-} from "@/components/atoms";
 import styles from "../styles/Home.module.css";
 import Cookies from "js-cookie";
 import Image from "next/image";
@@ -36,7 +30,6 @@ function Home() {
   const spotifyApi = useSpotify();
   const { data: session, status } = useSession();
   const [colorPrompt, setColorPrompt] = useState("");
-  const [loading, setLoading] = useRecoilState(loadingState);
   const [anchorEl, setAnchorEl] = useState(null);
   const [helpOpen, setHelpOpen] = useState(false);
   const router = useRouter();
@@ -50,7 +43,6 @@ function Home() {
     setAnchorEl(null);
   };
   const handleGenerate = () => {
-    setLoading(true);
     router.push("/result");
   };
   const handleHelpOpen = () => {

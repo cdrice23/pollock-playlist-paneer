@@ -18,13 +18,7 @@ import axios from "axios";
 import useSpotify from "@/hooks/useSpotify";
 import { openai } from "@/lib/openai";
 import Link from "next/link";
-import { useRecoilState, useRecoilValue } from "recoil";
 import { useRouter } from "next/router";
-import {
-  loadingState,
-  userColorsState,
-  userTopArtistsState,
-} from "@/components/atoms";
 import Loader from "@/components/Loader";
 import ImageResult from "@/components/ImageResult";
 import styles from "../styles/Result.module.css";
@@ -35,7 +29,7 @@ export default function Result() {
   // state
   const spotifyApi = useSpotify();
   const { data: session, status } = useSession();
-  const [loading, setLoading] = useRecoilState(loadingState);
+  const [loading, setLoading] = useState(false);
   const [anchorEl, setAnchorEl] = React.useState(null);
   const router = useRouter();
   const open = Boolean(anchorEl);
@@ -61,6 +55,7 @@ export default function Result() {
 
   // UseEffect on initial load to check for cookies
   useEffect(() => {
+    setLoading(true);
     let retries = 0;
     const intervalId = setInterval(() => {
       if (retries >= 10) {
